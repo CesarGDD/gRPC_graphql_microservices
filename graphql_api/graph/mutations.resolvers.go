@@ -22,11 +22,11 @@ import (
 func (r *mutationResolver) CreateProduct(ctx context.Context, input model.NewProductInput) (*checkout.Response, error) {
 	fmt.Println("Mutation to create a product:", input)
 	res, err := r.ProductsClient.CreateProduct(ctx, &productspb.CreateProductRequest{
-		Name: input.Name,
-		Url: input.URL,
-		Price: int32(input.Price),
+		Name:        input.Name,
+		Url:         input.URL,
+		Price:       int32(input.Price),
 		Description: input.Description,
-		Title: input.Title,
+		Title:       input.Title,
 	})
 	if err != nil {
 		fmt.Printf("Error creating product: %v\n", err)
@@ -60,12 +60,12 @@ func (r *mutationResolver) UpdateProduct(ctx context.Context, input model.Update
 	fmt.Println("Mutation to update a product:", input)
 	res, err := r.ProductsClient.UpdateProduct(ctx, &productspb.UpdateProductRequest{
 		Product: &productspb.Product{
-			ProductId: int32(input.ProductID),
-			Name: input.Name,
-			Url: input.URL,
-			Price: int32(input.Price),
+			ProductId:   int32(input.ProductID),
+			Name:        input.Name,
+			Url:         input.URL,
+			Price:       int32(input.Price),
 			Description: input.Description,
-			Title: input.Title,
+			Title:       input.Title,
 		},
 	})
 	if err != nil {
@@ -101,7 +101,7 @@ func (r *mutationResolver) DeleteProduct(ctx context.Context, productID int) (*c
 	res, err := r.ProductsClient.DeleteProduct(ctx, &productspb.DeleteProductRequest{
 		ProductId: int32(productID),
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -117,13 +117,13 @@ func (r *mutationResolver) DeleteProduct(ctx context.Context, productID int) (*c
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to delete product.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No product deleted")
 		graphql.AddError(ctx, gqlerror.Errorf("No product deleted"))
 		return nil, gqlerror.Errorf("No product found.")
 	}
-	
+
 	fmt.Println("Product deleted successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,
@@ -139,15 +139,15 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input model.CreateOr
 	for i, item := range input.OrderItems {
 		convertedItems[i] = &checkout.OrderItem{
 			ProductId: int32(item.ProductID),
-			Quantity: int32(item.Quantity),
+			Quantity:  int32(item.Quantity),
 		}
 	}
 	res, err := r.CheckoutClient.CreateOrder(ctx, &checkout.CreateOrderRequest{
-		UserId: int32(input.UserID),
+		UserId:     int32(input.UserID),
 		TotalPrice: int32(input.TotalPrice),
-		OrderItem: convertedItems,
+		OrderItem:  convertedItems,
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -163,13 +163,13 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input model.CreateOr
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to create order.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No order created")
 		graphql.AddError(ctx, gqlerror.Errorf("No order created"))
 		return nil, gqlerror.Errorf("No order found.")
 	}
-	
+
 	fmt.Println("order created successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,
@@ -181,10 +181,10 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input model.CreateOr
 func (r *mutationResolver) ProcessPayment(ctx context.Context, input model.ProcessPaymentInput) (*checkout.Response, error) {
 	fmt.Println("Mutation to process payment:", input)
 	res, err := r.CheckoutClient.ProcessPayment(ctx, &checkout.ProcessPaymentRequest{
-		OrderId: int32(input.OrderID),
+		OrderId:       int32(input.OrderID),
 		PaymentMethod: input.PaymentMethod,
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -200,13 +200,13 @@ func (r *mutationResolver) ProcessPayment(ctx context.Context, input model.Proce
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to process payment.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No payment processed")
 		graphql.AddError(ctx, gqlerror.Errorf("No payment processed"))
 		return nil, gqlerror.Errorf("No product found.")
 	}
-	
+
 	fmt.Println("payment processed successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,
@@ -220,9 +220,9 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input model.Registe
 	res, err := r.UserManagementClient.Register(ctx, &usermanagementpb.RegisterRequest{
 		Username: input.Username,
 		Password: input.Password,
-		Role: input.Role.String(),
+		Role:     input.Role.String(),
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -238,13 +238,13 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input model.Registe
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to register user.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No user registered")
 		graphql.AddError(ctx, gqlerror.Errorf("No user registered"))
 		return nil, gqlerror.Errorf("No user found.")
 	}
-	
+
 	fmt.Println("user registered successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,
@@ -257,12 +257,13 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	fmt.Println("Mutation to update an user:", input)
 	res, err := r.UserManagementClient.UpdateUser(ctx, &usermanagementpb.UpdateUserRequest{
 		User: &usermanagementpb.User{
-			UserId: int32(input.UserID),
-			Username: input.Username,
+			UserId:       int32(input.UserID),
+			Username:     input.Username,
 			PasswordHash: input.Password,
+			Role:         input.Role.String(),
 		},
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -278,13 +279,13 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to update user.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No user updated")
 		graphql.AddError(ctx, gqlerror.Errorf("No user updated"))
 		return nil, gqlerror.Errorf("No user found.")
 	}
-	
+
 	fmt.Println("user updated successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,
@@ -298,7 +299,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID int) (*checkou
 	res, err := r.UserManagementClient.DeleteUser(ctx, &usermanagementpb.DeleteUserRequest{
 		UserId: int32(userID),
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -314,13 +315,13 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID int) (*checkou
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to delete user.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No user deleted")
 		graphql.AddError(ctx, gqlerror.Errorf("No user deleted"))
 		return nil, gqlerror.Errorf("No user found.")
 	}
-	
+
 	fmt.Println("user deleted successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,
@@ -335,10 +336,10 @@ func (r *mutationResolver) AddItem(ctx context.Context, input model.AddItemInput
 		UserId: int32(input.UserID),
 		Item: &shoppingcart.ProductItem{
 			ProductId: int32(input.Item.ProductID),
-			Quantity: int32(input.Item.Quantity),
+			Quantity:  int32(input.Item.Quantity),
 		},
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -354,13 +355,13 @@ func (r *mutationResolver) AddItem(ctx context.Context, input model.AddItemInput
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to add item.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No item added")
 		graphql.AddError(ctx, gqlerror.Errorf("No item added"))
 		return nil, gqlerror.Errorf("No item found.")
 	}
-	
+
 	fmt.Println("item added successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,
@@ -375,10 +376,10 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input model.UpdateIte
 		UserId: int32(input.UserID),
 		Item: &shoppingcart.ProductItem{
 			ProductId: int32(input.Item.ProductID),
-			Quantity: int32(input.Item.Quantity),
+			Quantity:  int32(input.Item.Quantity),
 		},
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -394,13 +395,13 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input model.UpdateIte
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to update item.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No item updated")
 		graphql.AddError(ctx, gqlerror.Errorf("No item updated"))
 		return nil, gqlerror.Errorf("No item found.")
 	}
-	
+
 	fmt.Println("item updated successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,
@@ -412,10 +413,10 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input model.UpdateIte
 func (r *mutationResolver) RemoveItem(ctx context.Context, input model.RemoveItemInput) (*checkout.Response, error) {
 	fmt.Println("Mutation to remove an item:", input)
 	res, err := r.ShoppingCartClient.RemoveItem(ctx, &shoppingcart.RemoveItemRequest{
-		UserId: int32(input.UserID),
+		UserId:    int32(input.UserID),
 		ProductId: int32(input.ProductID),
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -431,13 +432,13 @@ func (r *mutationResolver) RemoveItem(ctx context.Context, input model.RemoveIte
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to remove item.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No item removed")
 		graphql.AddError(ctx, gqlerror.Errorf("No item removed"))
 		return nil, gqlerror.Errorf("No item found.")
 	}
-	
+
 	fmt.Println("item removed successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,
@@ -451,7 +452,7 @@ func (r *mutationResolver) ClearCart(ctx context.Context, input model.ClearCartI
 	res, err := r.ShoppingCartClient.ClearCar(ctx, &shoppingcart.ClearCartRequest{
 		UserId: int32(input.UserID),
 	})
-	
+
 	if err != nil {
 		var errMsg string
 		// Convert gRPC error to GraphQL error and get error message
@@ -467,13 +468,13 @@ func (r *mutationResolver) ClearCart(ctx context.Context, input model.ClearCartI
 		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
 		return nil, gqlerror.Errorf("Failed to clear cart.")
 	}
-	
+
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Println("No cart cleared")
 		graphql.AddError(ctx, gqlerror.Errorf("No cart cleared"))
 		return nil, gqlerror.Errorf("No cart cleared.")
 	}
-	
+
 	fmt.Println("car cleared successfully:", res.Response)
 	return &checkout.Response{
 		Message: res.Response.Message,

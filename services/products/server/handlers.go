@@ -79,7 +79,7 @@ func (s *ProductsServer) GetProduct(ctx context.Context, req *proto.GetProductRe
 	}, nil
 }
 func (s *ProductsServer) GetProductByName(ctx context.Context, req *proto.GetProductByNameRequest) (*proto.GetProductByNameResponse, error){
-	log.Println("Get product by name invoked")
+	log.Println("Get product by name invoked", req.Name)
 	product, err := s.queries.GetProductByName(ctx, req.Name)
 	if err != nil {
 		return nil, err

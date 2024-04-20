@@ -32,6 +32,7 @@ func (s *UserManagementServer) Register(ctx context.Context, req *proto.Register
 }
 
 func (s *UserManagementServer) UpdateUser(ctx context.Context, req *proto.UpdateUserRequest) (*proto.UpdateUserResponse, error) {
+	log.Println("Update user invoked", req.User)
 	err := s.queries.UpdateUser(ctx, db.UpdateUserParams{
 		UserID:       req.User.UserId,
 		Username:     req.User.Username,

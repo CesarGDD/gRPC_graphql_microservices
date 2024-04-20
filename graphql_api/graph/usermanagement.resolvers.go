@@ -15,7 +15,7 @@ import (
 
 // Role is the resolver for the role field.
 func (r *userResolver) Role(ctx context.Context, obj *usermanagementpb.User) (model.Role, error) {
-	panic(fmt.Errorf("not implemented: Role - role"))
+	return mapStringToRole(obj.Role)
 }
 
 // Products is the resolver for the products field.
@@ -30,7 +30,7 @@ func (r *userResolver) Orders(ctx context.Context, obj *usermanagementpb.User) (
 
 // Role is the resolver for the role field.
 func (r *userResponseResolver) Role(ctx context.Context, obj *usermanagementpb.UserResponse) (model.Role, error) {
-	panic(fmt.Errorf("not implemented: Role - role"))
+	return mapStringToRole(obj.Role)
 }
 
 // User returns UserResolver implementation.
