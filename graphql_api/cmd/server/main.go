@@ -1,8 +1,8 @@
 package main
 
 import (
+	clients "graphql_api/clients/server"
 	"graphql_api/graph"
-	"graphql_api/clients/server"
 	"log"
 	"net/http"
 	"os"
@@ -18,7 +18,6 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
-
 	// Initialize gRPC clients
 	checkoutClient := clients.CheckoutSvc()
 	userManagementClient := clients.UsermanagmentSvc()

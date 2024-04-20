@@ -1,57 +1,55 @@
 package clients
 
 import (
-	checkoutpb "graphql_api/protos/checkoutpb"
-	"graphql_api/protos/productspb"
-	shoppingcartpb "graphql_api/protos/shoppingcartpb"
-	"graphql_api/protos/usermanagementpb"
-	"log"
-	"os"
-
-	"google.golang.org/grpc"
+    "log"
+    "os"
+    "google.golang.org/grpc"
+    checkoutpb "graphql_api/protos/checkoutpb"
+    productspb "graphql_api/protos/productspb"
+    shoppingcartpb "graphql_api/protos/shoppingcartpb"
+    usermanagementpb "graphql_api/protos/usermanagementpb"
 )
 
-// ServiceClientCreator is a function type that creates a new client from a gRPC connection
-type ServiceClientCreator func(*grpc.ClientConn) interface{}
-
-// CreateServiceClient handles the connection setup and invokes the client creator function
-func CreateServiceClient(serviceURL string, creator ServiceClientCreator) interface{} {
-	opts := grpc.WithInsecure()
-	conn, err := grpc.Dial(os.Getenv(serviceURL), opts)
-	if err != nil {
-		log.Fatalf("Could not connect: %v", err)
-	}
-	return creator(conn)
+// CreateServiceClient handles the connection setup and returns a gRPC client
+func CreateServiceClient(serviceURL string, creator func(*grpc.ClientConn) interface{}) interface{} {
+    opts := grpc.WithInsecure()
+    log.Printf("Attempting to connect to service at URL: %s", serviceURL)
+    conn, err := grpc.Dial(serviceURL, opts)
+    if err != nil {
+        log.Fatalf("Could not connect to %s: %v", serviceURL, err)
+    }
+    log.Printf("Successfully connected to service at URL: %s", serviceURL)
+    return creator(conn)
 }
 
-// CheckoutSvc creates a client for the Checkout service
 func CheckoutSvc() checkoutpb.CheckoutServiceClient {
-	creator := func(conn *grpc.ClientConn) interface{} {
-		return checkoutpb.NewCheckoutServiceClient(conn)
-	}
-	return CreateServiceClient("CHECKOUT_URL", creator).(checkoutpb.CheckoutServiceClient)
+    serviceURL := os.Getenv("CHECKOUT_URL")
+    creator := func(conn *grpc.ClientConn) interface{} {
+        return checkoutpb.NewCheckoutServiceClient(conn)
+    }
+    return CreateServiceClient(serviceURL, creator).(checkoutpb.CheckoutServiceClient)
 }
 
-// UsermanagmentSvc creates a client for the Usermanagment service
 func UsermanagmentSvc() usermanagementpb.UserManagementServiceClient {
-	creator := func(conn *grpc.ClientConn) interface{} {
-		return usermanagementpb.NewUserManagementServiceClient(conn)
-	}
-	return CreateServiceClient("USERMANAGEMENT_URL", creator).(usermanagementpb.UserManagementServiceClient)
+    serviceURL := os.Getenv("USERMANAGEMENT_URL")
+    creator := func(conn *grpc.ClientConn) interface{} {
+        return usermanagementpb.NewUserManagementServiceClient(conn)
+    }
+    return CreateServiceClient(serviceURL, creator).(usermanagementpb.UserManagementServiceClient)
 }
 
-// ProductsSvc creates a client for the Products service
 func ProductsSvc() productspb.ProductServiceClient {
-	creator := func(conn *grpc.ClientConn) interface{} {
-		return productspb.NewProductServiceClient(conn)
-	}
-	return CreateServiceClient("PRODUCTS_URL", creator).(productspb.ProductServiceClient)
+    serviceURL := os.Getenv("PRODUCTS_URL")
+    creator := func(conn *grpc.ClientConn) interface{} {
+        return productspb.NewProductServiceClient(conn)
+    }
+    return CreateServiceClient(serviceURL, creator).(productspb.ProductServiceClient)
 }
 
-// ShoppingcartSvc creates a client for the Shoppingcart service
 func ShoppingcartSvc() shoppingcartpb.ShoppingCartServiceClient {
-	creator := func(conn *grpc.ClientConn) interface{} {
-		return shoppingcartpb.NewShoppingCartServiceClient(conn)
-	}
-	return CreateServiceClient("SHOPPINGCART_URL", creator).(shoppingcartpb.ShoppingCartServiceClient)
+    serviceURL := os.Getenv("SHOPPINGCART_URL")
+    creator := func(conn *grpc.ClientConn) interface{} {
+        return shoppingcartpb.NewShoppingCartServiceClient(conn)
+    }
+    return CreateServiceClient(serviceURL, creator).(shoppingcartpb.ShoppingCartServiceClient)
 }

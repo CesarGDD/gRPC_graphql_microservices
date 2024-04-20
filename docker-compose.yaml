@@ -19,7 +19,7 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
 
-  usermanagment:
+  usermanagement:
     build:
       context: ./services/usermanagement
       dockerfile: docker/dockerfile_dev
@@ -82,6 +82,25 @@ services:
       - ./services/checkout:/app
     depends_on:
       - postgres
+
+  graphql_api:
+    build:
+      context: ./graphql_api
+      dockerfile: docker/dockerfile_dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./graphql_api:/app
+    environment:
+        CHECKOUT_URL: checkout:50053
+        USERMANAGEMENT_URL: usermanagement:50050
+        PRODUCTS_URL: products:50051
+        SHOPPINGCART_URL: shoppingcart:50052
+    depends_on:
+      - usermanagement
+      - shoppingcart
+      - products
+      - checkout
       
 
 volumes:
