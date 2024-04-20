@@ -9,6 +9,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 )
 
 const defaultPort = "8080"
@@ -18,6 +20,7 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+
 	// Initialize gRPC clients
 	checkoutClient := clients.CheckoutSvc()
 	userManagementClient := clients.UsermanagmentSvc()
@@ -32,11 +35,25 @@ func main() {
 		ShoppingCartClient:    shoppingCartClient,
 	}
 
+	// Create GraphQL handler
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	// Configure chi router with CORS
+	router := chi.NewRouter()
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Allow all origins
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not necessary but useful for preflight requests
+	}))
 
+	// Set up HTTP routes
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", srv)
+
+	// Start server
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
+
