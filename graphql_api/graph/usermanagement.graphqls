@@ -11,6 +11,12 @@ type User {
   orders: [OrderDetails!]
 }
 
+type UserResponse {
+  userId: Int!
+  username: String!
+  role: Role!
+}
+
 input RegisterUserInput {
   username: String!
   password: String!

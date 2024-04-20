@@ -3,6 +3,11 @@ type ProductItem {
   quantity: Int!
 }
 
+type CartResponse {
+  success: Boolean!
+  cart: ShoppingCart!
+}
+
 type ShoppingCart {
   userId: Int!
   items: [ProductItem!]!

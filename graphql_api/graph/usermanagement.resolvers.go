@@ -28,10 +28,19 @@ func (r *userResolver) Orders(ctx context.Context, obj *usermanagementpb.User) (
 	panic(fmt.Errorf("not implemented: Orders - orders"))
 }
 
+// Role is the resolver for the role field.
+func (r *userResponseResolver) Role(ctx context.Context, obj *usermanagementpb.UserResponse) (model.Role, error) {
+	panic(fmt.Errorf("not implemented: Role - role"))
+}
+
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
+// UserResponse returns UserResponseResolver implementation.
+func (r *Resolver) UserResponse() UserResponseResolver { return &userResponseResolver{r} }
+
 type userResolver struct{ *Resolver }
+type userResponseResolver struct{ *Resolver }
 
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have

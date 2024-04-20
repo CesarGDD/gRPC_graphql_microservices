@@ -1,18 +1,18 @@
 type Query {
 # products
-  getProduct(productId: Int!): Product!
-  getProductByName(name: String!): Product!
-  getProducts: [Product!]!
+  getProduct(productId: Int!): ProductResponse!
+  getProductByName(name: String!): ProductResponse!
+  getProducts: [ProductResponse!]!
 
 # orders
   getOrderDetails(input: GetOrderDetailsInput!): Order!
   getPaymentDetails(input: GetPaymentDetailsInput!): PaymentDetails!
 
 # users
-  getUser(userId: Int!): User!
-  getUsers: [User!]!
-  getUserByUsername(username: String!): User!
+  getUser(userId: Int!): UserResponse!
+  getUsers: [UserResponse!]!
+  getUserByUsername(username: String!): UserResponse!
 
 # cart
-  getCart(input: GetCartInput!): ShoppingCart!
+  getCart(input: GetCartInput!): CartResponse!
 }

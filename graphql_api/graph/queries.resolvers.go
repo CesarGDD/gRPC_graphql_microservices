@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"graphql_api/graph/model"
+	checkout "graphql_api/protos/checkoutpb"
 	"graphql_api/protos/productspb"
 	shoppingcart "graphql_api/protos/shoppingcartpb"
 	"graphql_api/protos/usermanagementpb"
@@ -18,7 +19,7 @@ import (
 )
 
 // GetProduct is the resolver for the getProduct field.
-func (r *queryResolver) GetProduct(ctx context.Context, productID int) (*productspb.Product, error) {
+func (r *queryResolver) GetProduct(ctx context.Context, productID int) (*productspb.ProductResponse, error) {
 	fmt.Println("Request to get product:", productID)
 
 	res, err := r.ProductsClient.GetProduct(ctx, &productspb.GetProductRequest{
@@ -46,11 +47,11 @@ func (r *queryResolver) GetProduct(ctx context.Context, productID int) (*product
 	}
 
 	fmt.Println("Product retrieved successfully:", res.Product.Product.Name)
-	return res.Product.Product, nil
+	return res.Product, nil
 }
 
 // GetProductByName is the resolver for the getProductByName field.
-func (r *queryResolver) GetProductByName(ctx context.Context, name string) (*productspb.Product, error) {
+func (r *queryResolver) GetProductByName(ctx context.Context, name string) (*productspb.ProductResponse, error) {
 	fmt.Println("Request to get product by name:", name)
 
 	res, err := r.ProductsClient.GetProductByName(ctx, &productspb.GetProductByNameRequest{
@@ -78,11 +79,11 @@ func (r *queryResolver) GetProductByName(ctx context.Context, name string) (*pro
 	}
 
 	fmt.Println("Product retrieved successfully:", res.Product.Product.Name)
-	return res.Product.Product, nil
+	return res.Product, nil
 }
 
 // GetProducts is the resolver for the getProducts field.
-func (r *queryResolver) GetProducts(ctx context.Context) ([]*productspb.Product, error) {
+func (r *queryResolver) GetProducts(ctx context.Context) ([]*productspb.ProductResponse, error) {
 	fmt.Println("Request to get products:")
 
 	res, err := r.ProductsClient.GetProducts(ctx, &productspb.GetProductsRequest{})
@@ -113,32 +114,196 @@ func (r *queryResolver) GetProducts(ctx context.Context) ([]*productspb.Product,
 
 // GetOrderDetails is the resolver for the getOrderDetails field.
 func (r *queryResolver) GetOrderDetails(ctx context.Context, input model.GetOrderDetailsInput) (*model.Order, error) {
-	panic(fmt.Errorf("not implemented: GetOrderDetails - getOrderDetails"))
+	fmt.Println("Request to get order details:", input.OrderID)
+
+	var order = &model.Order{}
+	res, err := r.CheckoutClient.GetOrderDetails(ctx, &checkout.GetOrderDetailsRequest{
+		OrderId: int32(input.OrderID),
+	})
+	if err != nil {
+		fmt.Printf("Error fetching order %v\n", err)
+		// Convert gRPC error to GraphQL error
+		e, ok := status.FromError(err)
+		if ok {
+			// gRPC specific error handling
+			fmt.Printf("gRPC error status: %v\n", e.Message())
+			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
+		} else {
+			// General error handling
+			fmt.Printf("Non-gRPC error: %v\n", err)
+			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
+		}
+		return nil, gqlerror.Errorf("Failed to fetch order details.")
+	}
+	if res == nil || res.OrderDetails == nil {
+		fmt.Printf("No order found\n")
+		graphql.AddError(ctx, gqlerror.Errorf("No order found"))
+		return nil, gqlerror.Errorf("No order found.")
+	}
+	order.OrderDetails = res.OrderDetails
+	order.OrderItems = res.OrderItems
+	fmt.Println("Order retrieved successfully:")
+	return order, nil
 }
 
 // GetPaymentDetails is the resolver for the getPaymentDetails field.
 func (r *queryResolver) GetPaymentDetails(ctx context.Context, input model.GetPaymentDetailsInput) (*model.PaymentDetails, error) {
-	panic(fmt.Errorf("not implemented: GetPaymentDetails - getPaymentDetails"))
+	fmt.Println("Request to get payment details:", input.OrderID)
+	var payment = &model.PaymentDetails{}
+	res, err := r.CheckoutClient.GetPaymentDetails(ctx, &checkout.GetPaymentDetailsRequest{
+		OrderId: int32(input.OrderID),
+	})
+	if err != nil {
+		fmt.Printf("Error fetching payment details %v\n", err)
+		// Convert gRPC error to GraphQL error
+		e, ok := status.FromError(err)
+		if ok {
+			// gRPC specific error handling
+			fmt.Printf("gRPC error status: %v\n", e.Message())
+			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
+		} else {
+			// General error handling
+			fmt.Printf("Non-gRPC error: %v\n", err)
+			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
+		}
+		return nil, gqlerror.Errorf("Failed to fetch payment details.")
+	}
+	if res == nil || res.PaymentMethod == "" {
+		fmt.Printf("No payment details found\n")
+		graphql.AddError(ctx, gqlerror.Errorf("No payment details found"))
+		return nil, gqlerror.Errorf("No payment details found.")
+	}
+	payment.PaymentMethod = res.PaymentMethod
+	fmt.Println("Products retrieved successfully:")
+	return payment, nil
 }
 
 // GetUser is the resolver for the getUser field.
-func (r *queryResolver) GetUser(ctx context.Context, userID int) (*usermanagementpb.User, error) {
-	panic(fmt.Errorf("not implemented: GetUser - getUser"))
+func (r *queryResolver) GetUser(ctx context.Context, userID int) (*usermanagementpb.UserResponse, error) {
+	fmt.Println("Request to get user:", userID)
+
+	res, err := r.UserManagementClient.GetUser(ctx, &usermanagementpb.GetUserRequest{
+		UserId: int32(userID),
+	})
+	if err != nil {
+		fmt.Printf("Error fetching user %d: %v\n", userID, err)
+		// Convert gRPC error to GraphQL error
+		e, ok := status.FromError(err)
+		if ok {
+			// gRPC specific error handling
+			fmt.Printf("gRPC error status: %v\n", e.Message())
+			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
+		} else {
+			// General error handling
+			fmt.Printf("Non-gRPC error: %v\n", err)
+			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
+		}
+		return nil, gqlerror.Errorf("Failed to fetch user details.")
+	}
+	if res == nil || res.User == nil {
+		fmt.Printf("No user found for ID %d\n", userID)
+		graphql.AddError(ctx, gqlerror.Errorf("No user found with ID %d", userID))
+		return nil, gqlerror.Errorf("No user found.")
+	}
+
+	fmt.Println("user retrieved successfully:", res.User)
+	return res.User, nil
 }
 
 // GetUsers is the resolver for the getUsers field.
-func (r *queryResolver) GetUsers(ctx context.Context) ([]*usermanagementpb.User, error) {
-	panic(fmt.Errorf("not implemented: GetUsers - getUsers"))
+func (r *queryResolver) GetUsers(ctx context.Context) ([]*usermanagementpb.UserResponse, error) {
+	fmt.Println("Request to get users:")
+
+	res, err := r.UserManagementClient.GetUsers(ctx, &usermanagementpb.GetUsersRequest{})
+	if err != nil {
+		fmt.Printf("Error fetching users: %v\n", err)
+		// Convert gRPC error to GraphQL error
+		e, ok := status.FromError(err)
+		if ok {
+			// gRPC specific error handling
+			fmt.Printf("gRPC error status: %v\n", e.Message())
+			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
+		} else {
+			// General error handling
+			fmt.Printf("Non-gRPC error: %v\n", err)
+			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
+		}
+		return nil, gqlerror.Errorf("Failed to fetch users details.")
+	}
+	if res == nil || res.Users == nil {
+		fmt.Printf("No users found\n")
+		graphql.AddError(ctx, gqlerror.Errorf("No users found"))
+		return nil, gqlerror.Errorf("No user found.")
+	}
+
+	fmt.Println("user retrieved successfully:", res.Users)
+	return res.Users, nil
 }
 
 // GetUserByUsername is the resolver for the getUserByUsername field.
-func (r *queryResolver) GetUserByUsername(ctx context.Context, username string) (*usermanagementpb.User, error) {
-	panic(fmt.Errorf("not implemented: GetUserByUsername - getUserByUsername"))
+func (r *queryResolver) GetUserByUsername(ctx context.Context, username string) (*usermanagementpb.UserResponse, error) {
+	fmt.Println("Request to get user:", username)
+
+	res, err := r.UserManagementClient.GetUserByUsername(ctx, &usermanagementpb.GetUserByUsernameRequest{
+		Username: username,
+	})
+	if err != nil {
+		fmt.Printf("Error fetching user %s: %v\n", username, err)
+		// Convert gRPC error to GraphQL error
+		e, ok := status.FromError(err)
+		if ok {
+			// gRPC specific error handling
+			fmt.Printf("gRPC error status: %v\n", e.Message())
+			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
+		} else {
+			// General error handling
+			fmt.Printf("Non-gRPC error: %v\n", err)
+			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
+		}
+		return nil, gqlerror.Errorf("Failed to fetch user details.")
+	}
+	if res == nil || res.User == nil {
+		fmt.Printf("No user found for ID %s\n", username)
+		graphql.AddError(ctx, gqlerror.Errorf("No user found with ID %s", username))
+		return nil, gqlerror.Errorf("No user found.")
+	}
+
+	fmt.Println("user retrieved successfully:", res.User)
+	return res.User, nil
 }
 
 // GetCart is the resolver for the getCart field.
-func (r *queryResolver) GetCart(ctx context.Context, input model.GetCartInput) (*shoppingcart.ShoppingCart, error) {
-	panic(fmt.Errorf("not implemented: GetCart - getCart"))
+func (r *queryResolver) GetCart(ctx context.Context, input model.GetCartInput) (*model.CartResponse, error) {
+	fmt.Println("Request to get shopping cart:", input.UserID)
+
+	var cart = &model.CartResponse{}
+	res, err := r.ShoppingCartClient.GetCart(ctx, &shoppingcart.GetCartRequest{
+		UserId: int32(input.UserID),
+	})
+	if err != nil {
+		fmt.Printf("Error fetching shopping cart %d: %v\n", input.UserID, err)
+		// Convert gRPC error to GraphQL error
+		e, ok := status.FromError(err)
+		if ok {
+			// gRPC specific error handling
+			fmt.Printf("gRPC error status: %v\n", e.Message())
+			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
+		} else {
+			// General error handling
+			fmt.Printf("Non-gRPC error: %v\n", err)
+			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
+		}
+		return nil, gqlerror.Errorf("Failed to fetch shopping cart details.")
+	}
+	if res == nil || res.Cart == nil {
+		fmt.Printf("No shopping cart found for ID %d\n", input.UserID)
+		graphql.AddError(ctx, gqlerror.Errorf("No shopping cart found with ID %d", input.UserID))
+		return nil, gqlerror.Errorf("No shopping cart found.")
+	}
+	cart.Cart = res.Cart
+	cart.Success = res.Success
+	fmt.Println("user retrieved successfully:", res.Cart)
+	return cart, nil
 }
 
 // Query returns QueryResolver implementation.
