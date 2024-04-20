@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package checkout;
+
+option go_package = "/checkout";
+
+message Response {
+    bool success = 1;
+    string message = 2;
+}
+
+// The OrderItem message represents a single item in an order.
+message OrderItem {
+    int32 product_id = 1; // Unique identifier for the product
+    int32 quantity = 3; // Quantity of the product
+}
+
+// The OrderDetails message represents the complete order.
+message OrderDetails {
+    int32 order_id = 1; // Unique identifier for the order
+    int32 user_id = 2; // Unique identifier for the user
+    int32 total_price = 3; // Total price of the order
+    string status = 4; // Status of the order (e.g., "Pending", "Completed")
+}
+
+// Request to create an order from the shopping cart.
+message CreateOrderRequest {
+    int32 user_id = 1;
+    int32 total_price = 2;
+    repeated OrderItem orderItem =3;
+}
+
+// Response after creating an order.
+message CreateOrderResponse {
+    Response response = 1;
+}
+
+// Request to get order details.
+message GetOrderDetailsRequest {
+    int32 order_id = 1;
+}
+
+// Response to get order details.
+message GetOrderDetailsResponse {
+    OrderDetails orderDetails = 1;
+    repeated OrderItem orderItems = 2;
+}
+
+// Request for payment processing.
+message ProcessPaymentRequest {
+    int32 order_id = 1;
+    string payment_method = 2; // Details about the payment method (e.g., credit card, PayPal)
+}
+
+// Response after processing payment.
+message ProcessPaymentResponse {
+    Response response = 1;
+}
+
+// Request get payment.
+message GetPaymentDetailsRequest {
+    int32 order_id = 1;
+}
+
+// Response get payment.
+message GetPaymentDetailsResponse {
+    string payment_method = 1;
+}
+
+// CheckoutService defines the service interface for processing checkouts.
+service CheckoutService {
+    rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+    rpc GetOrderDetails(GetOrderDetailsRequest) returns (GetOrderDetailsResponse);
+    rpc ProcessPayment(ProcessPaymentRequest) returns (ProcessPaymentResponse);
+    rpc GetPaymentDetails(GetPaymentDetailsRequest) returns (GetPaymentDetailsResponse); 
+}

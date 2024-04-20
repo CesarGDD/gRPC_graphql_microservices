@@ -1,0 +1,88 @@
+version: '3.8'
+services:
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@domain.com
+      PGADMIN_DEFAULT_PASSWORD: SuperSecret
+    ports:
+      - "80:80"
+  postgres:
+    image: 'postgres'
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+
+  usermanagment:
+    build:
+      context: ./services/usermanagement
+      dockerfile: docker/dockerfile_dev
+    ports:
+      - "50050:50050"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+      POSTGRES_HOST: postgres
+    volumes:
+      - ./services/usermanagement:/app
+    depends_on:
+      - postgres
+
+  products:
+    build:
+      context: ./services/products
+      dockerfile: docker/dockerfile_dev
+    ports:
+      - "50051:50051"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+      POSTGRES_HOST: postgres
+    volumes:
+      - ./services/products:/app
+    depends_on:
+      - postgres
+
+  shoppingcart:
+    build:
+      context: ./services/shoppingcart
+      dockerfile: docker/dockerfile_dev
+    ports:
+      - "50052:50052"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+      POSTGRES_HOST: postgres
+    volumes:
+      - ./services/shoppingcart:/app
+    depends_on:
+      - postgres
+
+  checkout:
+    build:
+      context: ./services/checkout
+      dockerfile: docker/dockerfile_dev
+    ports:
+      - "50053:50053"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+      POSTGRES_HOST: postgres
+    volumes:
+      - ./services/checkout:/app
+    depends_on:
+      - postgres
+      
+
+volumes:
+  data:

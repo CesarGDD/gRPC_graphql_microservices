@@ -1,0 +1,21 @@
+type Mutation {
+# products
+  createProduct(input: NewProductInput!): Response!
+  updateProduct(input: UpdateProductInput!): Response!
+  deleteProduct(productId: Int!): Response!
+
+# orders
+  createOrder(input: CreateOrderInput!): Response!
+  processPayment(input: ProcessPaymentInput!): Response!
+
+# users
+  registerUser(input: RegisterUserInput!): Response!
+  updateUser(input: UpdateUserInput!): Response!
+  deleteUser(userId: Int!): Response!
+
+# cart
+  addItem(input: AddItemInput!): Response!
+  updateItem(input: UpdateItemInput!): Response!
+  removeItem(input: RemoveItemInput!): Response!
+  clearCart(input: ClearCartInput!): Response!
+}

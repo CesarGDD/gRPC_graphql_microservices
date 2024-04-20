@@ -1,0 +1,50 @@
+type Response {
+  success: Boolean!
+  message: String!
+}
+
+type OrderItem {
+  productId: Int!
+  quantity: Int!
+}
+
+type OrderDetails {
+  orderId: Int!
+  userId: Int!
+  totalPrice: Int!
+  status: String!
+}
+
+type Order {
+  orderDetails: OrderDetails!
+  orderItems: [OrderItem!]!
+}
+
+type PaymentDetails {
+  paymentMethod: String!
+}
+
+input NewOrderItem {
+  productId: Int!
+  quantity: Int!
+}
+
+input CreateOrderInput {
+  userId: Int!
+  totalPrice: Int!
+  orderItems: [NewOrderItem!]!
+}
+
+input GetOrderDetailsInput {
+  orderId: Int!
+}
+
+input ProcessPaymentInput {
+  orderId: Int!
+  paymentMethod: String!
+}
+
+input GetPaymentDetailsInput {
+  orderId: Int!
+}
+

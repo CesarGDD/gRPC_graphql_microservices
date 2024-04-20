@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package shoppingcart;
+
+option go_package = "/shoppingcart";
+
+message Response {
+    bool success = 1;
+    string message = 2;
+}
+
+// The ProductItem message represents a product in the shopping cart.
+message ProductItem {
+    int32 product_id = 1; // Unique identifier for the product
+    int32 quantity = 2; // Quantity of the product
+}
+
+// The ShoppingCart message represents a user's shopping cart.
+message ShoppingCart {
+    int32 user_id = 1; // Unique identifier for the user
+    repeated ProductItem items = 2; // List of items in the cart
+}
+
+// Request to add an item to the shopping cart.
+message AddItemRequest {
+    int32 user_id = 1;
+    ProductItem item = 2;
+}
+
+// Response after adding an item to the shopping cart.
+message AddItemResponse {
+    Response response = 1;
+}
+
+// Request to update an item in the shopping cart.
+message UpdateItemRequest {
+    int32 user_id = 1;
+    ProductItem item = 2; // Includes the new quantity to be updated
+}
+
+// Response after updating an item in the shopping cart.
+message UpdateItemResponse {
+    Response response = 1;
+}
+
+// Request to remove an item from the shopping cart.
+message RemoveItemRequest {
+    int32 user_id = 1;
+    int32 product_id = 2; // Product identifier for the item to be removed
+}
+
+// Response after removing an item from the shopping cart.
+message RemoveItemResponse {
+    Response response = 1;
+}
+
+// Request to clear cart.
+message ClearCartRequest {
+    int32 user_id = 1;
+}
+
+// Response after clear the cart.
+message ClearCartResponse {
+    Response response = 1;
+}
+
+// Request to retrieve the contents of the shopping cart.
+message GetCartRequest {
+    int32 user_id = 1;
+}
+
+// Response to retrieve the contents of the shopping cart.
+message GetCartResponse {
+    bool success = 1;
+    ShoppingCart cart = 2;
+}
+
+// ShoppingCartService defines the service interface for managing a shopping cart.
+service ShoppingCartService {
+    rpc AddItem(AddItemRequest) returns (AddItemResponse);
+    rpc UpdateItem(UpdateItemRequest) returns (UpdateItemResponse);
+    rpc RemoveItem(RemoveItemRequest) returns (RemoveItemResponse);
+    rpc ClearCar (ClearCartRequest) returns (ClearCartResponse);
+    rpc GetCart(GetCartRequest) returns (GetCartResponse);
+}

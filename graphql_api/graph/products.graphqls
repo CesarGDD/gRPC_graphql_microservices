@@ -1,0 +1,27 @@
+type Product {
+  productId: Int!
+  name: String!
+  url: String!
+  price: Int!
+  description: String!
+  title: String!
+}
+
+input NewProductInput {
+  name: String!
+  url: String!
+  price: Int!
+  description: String!
+  title: String!
+}
+
+input UpdateProductInput {
+  productId: Int!
+  name: String!
+  url: String!
+  price: Int!
+  description: String!
+  title: String!
+}
+
+

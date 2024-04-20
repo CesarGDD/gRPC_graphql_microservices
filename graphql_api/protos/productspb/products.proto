@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package productspb;
+
+option go_package = "/productspb";
+
+message Response {
+    bool success = 1;
+    string message = 2;
+}
+
+// Product message represents the data model for a product.
+message Product {
+    int32 product_id = 1; // Unique identifier for the product
+    string name = 2; // Name of the product
+    string url = 3; // URL for the product image
+    int32 price = 4; // Price of the product
+    string description = 5; // Description of the product
+    string title = 6; // Title of the product
+}
+
+// ProductResponse message represents the data model for a product response.
+message ProductResponse {
+    Product product = 1;
+}
+
+// Request message for creating a new product.
+message CreateProductRequest {
+    string name = 1; // Name of the product
+    string url = 2; // URL for the product image
+    int32 price = 3; // Price of the product
+    string description = 4; // Description of the product
+    string title = 5; // Title of the product
+}
+
+// Response message for creating a new product.
+message CreateProductResponse {
+    Response response = 1;
+}
+
+message UpdateProductRequest {
+    Product product = 1;
+}
+
+message UpdateProductResponse {
+    Response response = 1;
+}
+
+message GetProductRequest {
+    int32 product_id = 1;
+}
+
+message GetProductResponse {
+    ProductResponse product = 1;
+}
+
+message GetProductByNameRequest {
+    string name = 1;
+}
+
+message GetProductByNameResponse {
+    ProductResponse product = 1;
+}
+
+message GetProductsRequest {
+}
+
+message GetProductsResponse {
+    repeated ProductResponse products = 1;
+}
+
+message DeleteProductRequest {
+    int32 product_id = 1;
+}
+
+message DeleteProductResponse {
+    Response response = 1;
+}
+
+// ProductService defines the service interface for product management.
+service ProductService {
+    // Create a new product.
+    rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+    // Product management methods.
+    rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
+    rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+    rpc GetProductByName(GetProductByNameRequest) returns (GetProductByNameResponse);
+    rpc GetProducts(GetProductsRequest) returns (GetProductsResponse);
+    rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
+}

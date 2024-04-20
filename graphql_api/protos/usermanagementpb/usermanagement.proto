@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package usermanagementpb;
+
+option go_package = "/usermanagementpb";
+
+message Response {
+    bool success = 1;
+    string message = 2;
+}
+
+// User message represents the data model for a user.
+message User {
+    int32 user_id = 1; // Unique identifier for the user
+    string username = 2; // Username chosen by the user
+    string password_hash = 3; // Hashed password for the user
+    string role = 4; // Roles assigned to the user
+}
+
+// UserResponse message represents the data model for a user response.
+message UserResponse {
+    int32 user_id = 1; // Unique identifier for the user
+    string username = 2; // Username chosen by the user
+    string role = 4; // Roles assigned to the user
+}
+
+// Request message for registering a new user.
+message RegisterRequest {
+    string username = 1; // Username chosen by the user
+    string password = 2; // Hashed password for the user
+    string role = 3; // Roles assigned to the user
+}
+
+// Response message for registering a new user.
+message RegisterResponse {
+    Response response = 1;
+}
+
+message UpdateUserRequest {
+    User user = 1;
+}
+
+message UpdateUserResponse {
+    Response response = 1;
+}
+
+message GetUserRequest {
+    int32 user_id = 1;
+}
+
+message GetUserResponse {
+    UserResponse user = 1;
+}
+
+message GetUsersRequest {
+}
+
+message GetUsersResponse {
+    repeated UserResponse users = 1;
+}
+
+message GetUserByUsernameRequest {
+    string username = 1;
+}
+
+message GetUserByUsernameResponse {
+    UserResponse user = 1;
+}
+
+message DeleteUserRequest {
+    int32 user_id = 1;
+}
+
+message DeleteUserResponse {
+    Response response = 1;
+}
+
+// UserManagementService defines the service interface for user management.
+service UserManagementService {
+    // Register a new user.
+    rpc Register(RegisterRequest) returns (RegisterResponse);
+    // User management methods.
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+    rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+    rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserByUsernameResponse);
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+}

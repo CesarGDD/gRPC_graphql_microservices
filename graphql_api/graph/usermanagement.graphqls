@@ -1,0 +1,27 @@
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+type User {
+  userId: Int!
+  username: String!
+  role: Role!
+  products: [Product!]
+  orders: [OrderDetails!]
+}
+
+input RegisterUserInput {
+  username: String!
+  password: String!
+  role: Role!
+}
+
+input UpdateUserInput {
+  userId: Int!
+  username: String!
+  password: String!
+  role: Role!
+}
+
+

@@ -1,0 +1,39 @@
+type ProductItem {
+  productId: Int!
+  quantity: Int!
+}
+
+type ShoppingCart {
+  userId: Int!
+  items: [ProductItem!]!
+}
+
+input ProductItemInput {
+  productId: Int!
+  quantity: Int!
+}
+
+input AddItemInput {
+  userId: Int!
+  item: ProductItemInput!
+}
+
+input UpdateItemInput {
+  userId: Int!
+  item: ProductItemInput!
+}
+
+input RemoveItemInput {
+  userId: Int!
+  productId: Int!
+}
+
+input ClearCartInput {
+  userId: Int!
+}
+
+input GetCartInput {
+  userId: Int!
+}
+
+
