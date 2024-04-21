@@ -15,7 +15,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"google.golang.org/grpc/status"
 )
 
 // GetProduct is the resolver for the getProduct field.
@@ -27,18 +26,7 @@ func (r *queryResolver) GetProduct(ctx context.Context, productID int) (*product
 	})
 	if err != nil {
 		fmt.Printf("Error fetching product %d: %v\n", productID, err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch product details.")
+		return nil, handleError(ctx, err, "fetch product")
 	}
 	if res == nil || res.Product == nil {
 		fmt.Printf("No product found for ID %d\n", productID)
@@ -59,18 +47,7 @@ func (r *queryResolver) GetProductByName(ctx context.Context, name string) (*pro
 	})
 	if err != nil {
 		fmt.Printf("Error fetching product %s: %v\n", name, err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch product details.")
+		return nil, handleError(ctx, err, "fetch product by name")
 	}
 	if res == nil || res.Product == nil {
 		fmt.Printf("No product found for ID %s\n", name)
@@ -89,18 +66,7 @@ func (r *queryResolver) GetProducts(ctx context.Context) ([]*productspb.ProductR
 	res, err := r.ProductsClient.GetProducts(ctx, &productspb.GetProductsRequest{})
 	if err != nil {
 		fmt.Printf("Error fetching products %v\n", err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch products details.")
+		return nil, handleError(ctx, err, "fetch product details")
 	}
 	if res == nil || res.Products == nil {
 		fmt.Printf("No products found\n")
@@ -121,18 +87,7 @@ func (r *queryResolver) GetOrderDetails(ctx context.Context, input model.GetOrde
 	})
 	if err != nil {
 		fmt.Printf("Error fetching order %v\n", err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch order details.")
+		return nil, handleError(ctx, err, "Error fetching order")
 	}
 	if res == nil || res.OrderDetails == nil {
 		fmt.Printf("No order found\n")
@@ -154,18 +109,7 @@ func (r *queryResolver) GetOrdersDetailsByUserID(ctx context.Context, input mode
 	})
 	if err != nil {
 		fmt.Printf("Error fetching order %v\n", err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch order details by userId.")
+		return nil, handleError(ctx, err, "Error fetching order by userId")
 	}
 	if res == nil || res.OrdersDetails == nil {
 		fmt.Printf("No orders by userId found\n")
@@ -185,18 +129,7 @@ func (r *queryResolver) GetPaymentDetails(ctx context.Context, input model.GetPa
 	})
 	if err != nil {
 		fmt.Printf("Error fetching payment details %v\n", err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch payment details.")
+		return nil, handleError(ctx, err, "Error fetching payment details")
 	}
 	if res == nil || res.PaymentMethod == "" {
 		fmt.Printf("No payment details found\n")
@@ -219,18 +152,7 @@ func (r *queryResolver) GetUser(ctx context.Context, userID int) (*usermanagemen
 	})
 	if err != nil {
 		fmt.Printf("Error fetching user %d: %v\n", userID, err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch user details.")
+		return nil, handleError(ctx, err, "Error fetching user")
 	}
 	if res == nil || res.User == nil {
 		fmt.Printf("No user found for ID %d\n", userID)
@@ -249,18 +171,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*usermanagementpb.UserR
 	res, err := r.UserManagementClient.GetUsers(ctx, &usermanagementpb.GetUsersRequest{})
 	if err != nil {
 		fmt.Printf("Error fetching users: %v\n", err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch users details.")
+		return nil, handleError(ctx, err, "Error fetching users")
 	}
 	if res == nil || res.Users == nil {
 		fmt.Printf("No users found\n")
@@ -281,18 +192,7 @@ func (r *queryResolver) GetUserByUsername(ctx context.Context, username string) 
 	})
 	if err != nil {
 		fmt.Printf("Error fetching user %s: %v\n", username, err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch user details.")
+		return nil, handleError(ctx, err, "Error fetching user by username")
 	}
 	if res == nil || res.User == nil {
 		fmt.Printf("No user found for ID %s\n", username)
@@ -313,18 +213,7 @@ func (r *queryResolver) GetCart(ctx context.Context, input model.GetCartInput) (
 	})
 	if err != nil {
 		fmt.Printf("Error fetching shopping cart %d: %v\n", input.UserID, err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to fetch shopping cart details.")
+		return nil, handleError(ctx, err, "Error fetching shopping cart")
 	}
 	if res == nil || res.Cart == nil {
 		fmt.Printf("No shopping cart found for ID %d\n", input.UserID)

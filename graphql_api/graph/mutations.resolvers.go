@@ -15,7 +15,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"google.golang.org/grpc/status"
 )
 
 // CreateProduct is the resolver for the createProduct field.
@@ -31,18 +30,7 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, input model.NewPro
 	})
 	if err != nil {
 		fmt.Printf("Error creating product: %v\n", err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to create product.")
+		return nil, handleError(ctx, err, "Error creating product")
 	}
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Printf("No product created\n")
@@ -70,19 +58,8 @@ func (r *mutationResolver) UpdateProduct(ctx context.Context, input model.Update
 		},
 	})
 	if err != nil {
-		fmt.Printf("Error creating product: %v\n", err)
-		// Convert gRPC error to GraphQL error
-		e, ok := status.FromError(err)
-		if ok {
-			// gRPC specific error handling
-			fmt.Printf("gRPC error status: %v\n", e.Message())
-			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
-		} else {
-			// General error handling
-			fmt.Printf("Non-gRPC error: %v\n", err)
-			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
-		}
-		return nil, gqlerror.Errorf("Failed to update product.")
+		fmt.Printf("Error updating product: %v\n", err)
+		return nil, handleError(ctx, err, "Error updating product")
 	}
 	if res == nil || res.Response == nil || !res.Response.Success {
 		fmt.Printf("No product updated\n")
@@ -104,19 +81,8 @@ func (r *mutationResolver) DeleteProduct(ctx context.Context, productID int) (*c
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to delete product.")
+		fmt.Printf("Error deleting product: %v\n", err)
+		return nil, handleError(ctx, err, "Error deleting product")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
@@ -150,19 +116,8 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input model.CreateOr
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to create order.")
+		fmt.Printf("Error creating order: %v\n", err)
+		return nil, handleError(ctx, err, "Error creating order")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
@@ -187,19 +142,8 @@ func (r *mutationResolver) ProcessPayment(ctx context.Context, input model.Proce
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to process payment.")
+		fmt.Printf("Error processing payment: %v\n", err)
+		return nil, handleError(ctx, err, "Error processing payment")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
@@ -225,19 +169,8 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input model.Registe
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to register user.")
+		fmt.Printf("Error registering user: %v\n", err)
+		return nil, handleError(ctx, err, "Error registering user")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
@@ -266,19 +199,8 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to update user.")
+		fmt.Printf("Error updating user: %v\n", err)
+		return nil, handleError(ctx, err, "Error updating user")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
@@ -302,19 +224,8 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID int) (*checkou
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to delete user.")
+		fmt.Printf("Error deleting user: %v\n", err)
+		return nil, handleError(ctx, err, "Error deleting user")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
@@ -342,19 +253,8 @@ func (r *mutationResolver) AddItem(ctx context.Context, input model.AddItemInput
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to add item.")
+		fmt.Printf("Error adding item: %v\n", err)
+		return nil, handleError(ctx, err, "Error adding item")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
@@ -382,19 +282,8 @@ func (r *mutationResolver) UpdateItem(ctx context.Context, input model.UpdateIte
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to update item.")
+		fmt.Printf("Error updating item: %v\n", err)
+		return nil, handleError(ctx, err, "Error updating item")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
@@ -419,19 +308,8 @@ func (r *mutationResolver) RemoveItem(ctx context.Context, input model.RemoveIte
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to remove item.")
+		fmt.Printf("Error removing item: %v\n", err)
+		return nil, handleError(ctx, err, "Error removing item")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
@@ -455,19 +333,8 @@ func (r *mutationResolver) ClearCart(ctx context.Context, input model.ClearCartI
 	})
 
 	if err != nil {
-		var errMsg string
-		// Convert gRPC error to GraphQL error and get error message
-		if e, ok := status.FromError(err); ok {
-			// gRPC specific error handling
-			errMsg = fmt.Sprintf("gRPC error: %s", e.Message())
-			fmt.Printf("gRPC error status: %v\n", errMsg)
-		} else {
-			// General error handling
-			errMsg = fmt.Sprintf("Internal server error: %v", err)
-			fmt.Printf("Non-gRPC error: %v\n", err)
-		}
-		graphql.AddError(ctx, gqlerror.Errorf(errMsg))
-		return nil, gqlerror.Errorf("Failed to clear cart.")
+		fmt.Printf("Error clearing cart: %v\n", err)
+		return nil, handleError(ctx, err, "Error clearing cart")
 	}
 
 	if res == nil || res.Response == nil || !res.Response.Success {
