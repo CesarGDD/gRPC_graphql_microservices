@@ -23,6 +23,7 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, input model.NewPro
 	fmt.Println("Mutation to create a product:", input)
 	res, err := r.ProductsClient.CreateProduct(ctx, &productspb.CreateProductRequest{
 		Name:        input.Name,
+		UserId:      int32(input.UserID),
 		Url:         input.URL,
 		Price:       int32(input.Price),
 		Description: input.Description,
@@ -145,7 +146,7 @@ func (r *mutationResolver) CreateOrder(ctx context.Context, input model.CreateOr
 	res, err := r.CheckoutClient.CreateOrder(ctx, &checkout.CreateOrderRequest{
 		UserId:     int32(input.UserID),
 		TotalPrice: int32(input.TotalPrice),
-		OrderItem:  convertedItems,
+		OrderItems: convertedItems,
 	})
 
 	if err != nil {

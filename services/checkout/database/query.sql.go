@@ -91,6 +91,37 @@ func (q *Queries) GetOrderItems(ctx context.Context, orderID int32) ([]GetOrderI
 	return items, nil
 }
 
+const getOrdersDetailsByUserId = `-- name: GetOrdersDetailsByUserId :many
+SELECT order_id, user_id, total_price, status
+FROM orders
+WHERE user_id = $1
+`
+
+func (q *Queries) GetOrdersDetailsByUserId(ctx context.Context, userID int32) ([]Order, error) {
+	rows, err := q.db.Query(ctx, getOrdersDetailsByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Order
+	for rows.Next() {
+		var i Order
+		if err := rows.Scan(
+			&i.OrderID,
+			&i.UserID,
+			&i.TotalPrice,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPaymentDetails = `-- name: GetPaymentDetails :one
 SELECT payment_method
 FROM payment

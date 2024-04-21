@@ -11,6 +11,10 @@ import (
 	checkout "graphql_api/protos/checkoutpb"
 	"graphql_api/protos/productspb"
 	"graphql_api/protos/usermanagementpb"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+	"google.golang.org/grpc/status"
 )
 
 // Role is the resolver for the role field.
@@ -20,12 +24,78 @@ func (r *userResolver) Role(ctx context.Context, obj *usermanagementpb.User) (mo
 
 // Products is the resolver for the products field.
 func (r *userResolver) Products(ctx context.Context, obj *usermanagementpb.User) ([]*productspb.Product, error) {
-	panic(fmt.Errorf("not implemented: Products - products"))
+	fmt.Println("Request to get products user resolver:", obj.UserId)
+
+	res, err := r.ProductsClient.GetProductByUserId(ctx, &productspb.GetProductByUserIdRequest{
+		UserId: obj.UserId,
+	})
+	if err != nil {
+		fmt.Printf("Error fetching products %d: %v\n", obj.UserId, err)
+		// Convert gRPC error to GraphQL error
+		e, ok := status.FromError(err)
+		if ok {
+			// gRPC specific error handling
+			fmt.Printf("gRPC error status: %v\n", e.Message())
+			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
+		} else {
+			// General error handling
+			fmt.Printf("Non-gRPC error: %v\n", err)
+			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
+		}
+		return nil, gqlerror.Errorf("Failed to fetch products.")
+	}
+	if res == nil || res.Product == nil {
+		fmt.Printf("No products found for userID %d\n", obj.UserId)
+		graphql.AddError(ctx, gqlerror.Errorf("No products found with userID %d", obj.UserId))
+		return nil, gqlerror.Errorf("No product found.")
+	}
+
+	var productsResponses []*productspb.Product
+	for _, product := range res.Product {
+		productsResponses = append(productsResponses, &productspb.Product{
+			ProductId:   product.Product.ProductId,
+			UserId:      product.Product.UserId,
+			Name:        product.Product.Name,
+			Url:         product.Product.Url,
+			Price:       product.Product.Price,
+			Description: product.Product.Description,
+			Title:       product.Product.Title,
+		})
+	}
+
+	fmt.Println("Product retrieved successfully:", res.Product)
+	return productsResponses, nil
 }
 
 // Orders is the resolver for the orders field.
 func (r *userResolver) Orders(ctx context.Context, obj *usermanagementpb.User) ([]*checkout.OrderDetails, error) {
-	panic(fmt.Errorf("not implemented: Orders - orders"))
+	fmt.Println("Request to get order details by userId:", obj.UserId)
+
+	res, err := r.CheckoutClient.GetOrdersDetailsByUserId(ctx, &checkout.GetOrdersDetailsByUserIdRequest{
+		UserId: obj.UserId,
+	})
+	if err != nil {
+		fmt.Printf("Error fetching order %v\n", err)
+		// Convert gRPC error to GraphQL error
+		e, ok := status.FromError(err)
+		if ok {
+			// gRPC specific error handling
+			fmt.Printf("gRPC error status: %v\n", e.Message())
+			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
+		} else {
+			// General error handling
+			fmt.Printf("Non-gRPC error: %v\n", err)
+			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
+		}
+		return nil, gqlerror.Errorf("Failed to fetch order details by userId.")
+	}
+	if res == nil || res.OrdersDetails == nil {
+		fmt.Printf("No order found\n")
+		graphql.AddError(ctx, gqlerror.Errorf("No order by userId found"))
+		return nil, gqlerror.Errorf("No order by userId found.")
+	}
+	fmt.Println("Order by userId retrieved successfully:")
+	return res.OrdersDetails, nil
 }
 
 // Role is the resolver for the role field.

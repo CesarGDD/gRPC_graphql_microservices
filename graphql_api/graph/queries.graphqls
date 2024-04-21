@@ -6,6 +6,7 @@ type Query {
 
 # orders
   getOrderDetails(input: GetOrderDetailsInput!): Order!
+  GetOrdersDetailsByUserId(input: GetOrdersDetailsByUserIdInput!): [OrderDetails!]!
   getPaymentDetails(input: GetPaymentDetailsInput!): PaymentDetails!
 
 # users

@@ -116,7 +116,6 @@ func (r *queryResolver) GetProducts(ctx context.Context) ([]*productspb.ProductR
 func (r *queryResolver) GetOrderDetails(ctx context.Context, input model.GetOrderDetailsInput) (*model.Order, error) {
 	fmt.Println("Request to get order details:", input.OrderID)
 
-	var order = &model.Order{}
 	res, err := r.CheckoutClient.GetOrderDetails(ctx, &checkout.GetOrderDetailsRequest{
 		OrderId: int32(input.OrderID),
 	})
@@ -140,16 +139,21 @@ func (r *queryResolver) GetOrderDetails(ctx context.Context, input model.GetOrde
 		graphql.AddError(ctx, gqlerror.Errorf("No order found"))
 		return nil, gqlerror.Errorf("No order found.")
 	}
-	order.OrderDetails = res.OrderDetails
-	order.OrderItems = res.OrderItems
 	fmt.Println("Order retrieved successfully:")
-	return order, nil
+	return &model.Order{
+		OrderDetails: res.OrderDetails,
+	}, nil
+}
+
+// GetOrdersDetailsByUserID is the resolver for the GetOrdersDetailsByUserId field.
+func (r *queryResolver) GetOrdersDetailsByUserID(ctx context.Context, input model.GetOrdersDetailsByUserIDInput) ([]*checkout.OrderDetails, error) {
+	panic(fmt.Errorf("not implemented: GetOrdersDetailsByUserID - GetOrdersDetailsByUserId"))
 }
 
 // GetPaymentDetails is the resolver for the getPaymentDetails field.
 func (r *queryResolver) GetPaymentDetails(ctx context.Context, input model.GetPaymentDetailsInput) (*model.PaymentDetails, error) {
 	fmt.Println("Request to get payment details:", input.OrderID)
-	var payment = &model.PaymentDetails{}
+
 	res, err := r.CheckoutClient.GetPaymentDetails(ctx, &checkout.GetPaymentDetailsRequest{
 		OrderId: int32(input.OrderID),
 	})
@@ -173,9 +177,11 @@ func (r *queryResolver) GetPaymentDetails(ctx context.Context, input model.GetPa
 		graphql.AddError(ctx, gqlerror.Errorf("No payment details found"))
 		return nil, gqlerror.Errorf("No payment details found.")
 	}
-	payment.PaymentMethod = res.PaymentMethod
+
 	fmt.Println("Products retrieved successfully:")
-	return payment, nil
+	return &model.PaymentDetails{
+		PaymentMethod: res.PaymentMethod,
+	}, nil
 }
 
 // GetUser is the resolver for the getUser field.
@@ -276,7 +282,6 @@ func (r *queryResolver) GetUserByUsername(ctx context.Context, username string) 
 func (r *queryResolver) GetCart(ctx context.Context, input model.GetCartInput) (*model.CartResponse, error) {
 	fmt.Println("Request to get shopping cart:", input.UserID)
 
-	var cart = &model.CartResponse{}
 	res, err := r.ShoppingCartClient.GetCart(ctx, &shoppingcart.GetCartRequest{
 		UserId: int32(input.UserID),
 	})
@@ -300,10 +305,12 @@ func (r *queryResolver) GetCart(ctx context.Context, input model.GetCartInput) (
 		graphql.AddError(ctx, gqlerror.Errorf("No shopping cart found with ID %d", input.UserID))
 		return nil, gqlerror.Errorf("No shopping cart found.")
 	}
-	cart.Cart = res.Cart
-	cart.Success = res.Success
+
 	fmt.Println("user retrieved successfully:", res.Cart)
-	return cart, nil
+	return &model.CartResponse{
+		Success: res.Success,
+		Cart:    res.Cart,
+	}, nil
 }
 
 // Query returns QueryResolver implementation.

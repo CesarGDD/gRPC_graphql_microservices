@@ -38,6 +38,10 @@ type GetOrderDetailsInput struct {
 	OrderID int `json:"orderId"`
 }
 
+type GetOrdersDetailsByUserIDInput struct {
+	UserID int `json:"userId"`
+}
+
 type GetPaymentDetailsInput struct {
 	OrderID int `json:"orderId"`
 }
@@ -52,6 +56,7 @@ type NewOrderItem struct {
 
 type NewProductInput struct {
 	Name        string `json:"name"`
+	UserID      int    `json:"userId"`
 	URL         string `json:"url"`
 	Price       int    `json:"price"`
 	Description string `json:"description"`
@@ -60,7 +65,6 @@ type NewProductInput struct {
 
 type Order struct {
 	OrderDetails *checkout.OrderDetails `json:"orderDetails"`
-	OrderItems   []*checkout.OrderItem  `json:"orderItems"`
 }
 
 type PaymentDetails struct {

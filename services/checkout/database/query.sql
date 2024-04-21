@@ -11,6 +11,11 @@ SELECT order_id, user_id, total_price, status
 FROM orders
 WHERE order_id = $1;
 
+-- name: GetOrdersDetailsByUserId :many
+SELECT order_id, user_id, total_price, status
+FROM orders
+WHERE user_id = $1;
+
 -- name: GetOrderItems :many
 SELECT product_id, quantity
 FROM order_items

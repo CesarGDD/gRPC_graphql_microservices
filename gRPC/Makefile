@@ -1,4 +1,4 @@
-usermanagment-svc:
+usermanagement-svc:
 	cp usermanagement.proto ../services/usermanagement/proto/ && \
 	cp buf.gen.yaml ../services/usermanagement/proto/ && \
 	cd ../services/usermanagement/proto && \
@@ -30,3 +30,6 @@ graphql_api:
 	cp buf.gen.yaml ../graphql_api/protos/ && \
 	cd ../graphql_api/protos && \
 	buf generate
+
+proto: usermanagement-svc products-svc shoppingcart-svc checkout-svc graphql_api
+	

@@ -1,10 +1,12 @@
 type Product {
   productId: Int!
+  userId: Int!
   name: String!
   url: String!
   price: Int!
   description: String!
   title: String!
+  userOwner: User!
 }
 
 
@@ -14,6 +16,7 @@ type ProductResponse {
 
 input NewProductInput {
   name: String!
+  userId: Int!
   url: String!
   price: Int!
   description: String!

@@ -13,11 +13,11 @@ type OrderDetails {
   userId: Int!
   totalPrice: Int!
   status: String!
+  orderItems: [OrderItem!]!
 }
 
 type Order {
   orderDetails: OrderDetails!
-  orderItems: [OrderItem!]!
 }
 
 type PaymentDetails {
@@ -37,6 +37,10 @@ input CreateOrderInput {
 
 input GetOrderDetailsInput {
   orderId: Int!
+}
+
+input GetOrdersDetailsByUserIdInput {
+  userId: Int!
 }
 
 input ProcessPaymentInput {

@@ -21,13 +21,14 @@ message OrderDetails {
     int32 user_id = 2; // Unique identifier for the user
     int32 total_price = 3; // Total price of the order
     string status = 4; // Status of the order (e.g., "Pending", "Completed")
+    repeated OrderItem orderItems = 5;
 }
 
 // Request to create an order from the shopping cart.
 message CreateOrderRequest {
     int32 user_id = 1;
     int32 total_price = 2;
-    repeated OrderItem orderItem =3;
+    repeated OrderItem orderItems =3;
 }
 
 // Response after creating an order.
@@ -43,7 +44,16 @@ message GetOrderDetailsRequest {
 // Response to get order details.
 message GetOrderDetailsResponse {
     OrderDetails orderDetails = 1;
-    repeated OrderItem orderItems = 2;
+}
+
+// Request to get order details.
+message GetOrdersDetailsByUserIdRequest {
+    int32 user_id = 1;
+}
+
+// Response to get order details.
+message GetOrdersDetailsByUserIdResponse {
+    repeated OrderDetails ordersDetails = 1;
 }
 
 // Request for payment processing.
@@ -71,6 +81,7 @@ message GetPaymentDetailsResponse {
 service CheckoutService {
     rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
     rpc GetOrderDetails(GetOrderDetailsRequest) returns (GetOrderDetailsResponse);
+    rpc GetOrdersDetailsByUserId(GetOrdersDetailsByUserIdRequest) returns (GetOrdersDetailsByUserIdResponse);
     rpc ProcessPayment(ProcessPaymentRequest) returns (ProcessPaymentResponse);
     rpc GetPaymentDetails(GetPaymentDetailsRequest) returns (GetPaymentDetailsResponse); 
 }

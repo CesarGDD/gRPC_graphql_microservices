@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	CheckoutService_CreateOrder_FullMethodName       = "/checkout.CheckoutService/CreateOrder"
-	CheckoutService_GetOrderDetails_FullMethodName   = "/checkout.CheckoutService/GetOrderDetails"
-	CheckoutService_ProcessPayment_FullMethodName    = "/checkout.CheckoutService/ProcessPayment"
-	CheckoutService_GetPaymentDetails_FullMethodName = "/checkout.CheckoutService/GetPaymentDetails"
+	CheckoutService_CreateOrder_FullMethodName              = "/checkout.CheckoutService/CreateOrder"
+	CheckoutService_GetOrderDetails_FullMethodName          = "/checkout.CheckoutService/GetOrderDetails"
+	CheckoutService_GetOrdersDetailsByUserId_FullMethodName = "/checkout.CheckoutService/GetOrdersDetailsByUserId"
+	CheckoutService_ProcessPayment_FullMethodName           = "/checkout.CheckoutService/ProcessPayment"
+	CheckoutService_GetPaymentDetails_FullMethodName        = "/checkout.CheckoutService/GetPaymentDetails"
 )
 
 // CheckoutServiceClient is the client API for CheckoutService service.
@@ -31,6 +32,7 @@ const (
 type CheckoutServiceClient interface {
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
 	GetOrderDetails(ctx context.Context, in *GetOrderDetailsRequest, opts ...grpc.CallOption) (*GetOrderDetailsResponse, error)
+	GetOrdersDetailsByUserId(ctx context.Context, in *GetOrdersDetailsByUserIdRequest, opts ...grpc.CallOption) (*GetOrdersDetailsByUserIdResponse, error)
 	ProcessPayment(ctx context.Context, in *ProcessPaymentRequest, opts ...grpc.CallOption) (*ProcessPaymentResponse, error)
 	GetPaymentDetails(ctx context.Context, in *GetPaymentDetailsRequest, opts ...grpc.CallOption) (*GetPaymentDetailsResponse, error)
 }
@@ -61,6 +63,15 @@ func (c *checkoutServiceClient) GetOrderDetails(ctx context.Context, in *GetOrde
 	return out, nil
 }
 
+func (c *checkoutServiceClient) GetOrdersDetailsByUserId(ctx context.Context, in *GetOrdersDetailsByUserIdRequest, opts ...grpc.CallOption) (*GetOrdersDetailsByUserIdResponse, error) {
+	out := new(GetOrdersDetailsByUserIdResponse)
+	err := c.cc.Invoke(ctx, CheckoutService_GetOrdersDetailsByUserId_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *checkoutServiceClient) ProcessPayment(ctx context.Context, in *ProcessPaymentRequest, opts ...grpc.CallOption) (*ProcessPaymentResponse, error) {
 	out := new(ProcessPaymentResponse)
 	err := c.cc.Invoke(ctx, CheckoutService_ProcessPayment_FullMethodName, in, out, opts...)
@@ -85,6 +96,7 @@ func (c *checkoutServiceClient) GetPaymentDetails(ctx context.Context, in *GetPa
 type CheckoutServiceServer interface {
 	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error)
 	GetOrderDetails(context.Context, *GetOrderDetailsRequest) (*GetOrderDetailsResponse, error)
+	GetOrdersDetailsByUserId(context.Context, *GetOrdersDetailsByUserIdRequest) (*GetOrdersDetailsByUserIdResponse, error)
 	ProcessPayment(context.Context, *ProcessPaymentRequest) (*ProcessPaymentResponse, error)
 	GetPaymentDetails(context.Context, *GetPaymentDetailsRequest) (*GetPaymentDetailsResponse, error)
 	mustEmbedUnimplementedCheckoutServiceServer()
@@ -99,6 +111,9 @@ func (UnimplementedCheckoutServiceServer) CreateOrder(context.Context, *CreateOr
 }
 func (UnimplementedCheckoutServiceServer) GetOrderDetails(context.Context, *GetOrderDetailsRequest) (*GetOrderDetailsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrderDetails not implemented")
+}
+func (UnimplementedCheckoutServiceServer) GetOrdersDetailsByUserId(context.Context, *GetOrdersDetailsByUserIdRequest) (*GetOrdersDetailsByUserIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOrdersDetailsByUserId not implemented")
 }
 func (UnimplementedCheckoutServiceServer) ProcessPayment(context.Context, *ProcessPaymentRequest) (*ProcessPaymentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ProcessPayment not implemented")
@@ -155,6 +170,24 @@ func _CheckoutService_GetOrderDetails_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CheckoutService_GetOrdersDetailsByUserId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOrdersDetailsByUserIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CheckoutServiceServer).GetOrdersDetailsByUserId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CheckoutService_GetOrdersDetailsByUserId_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CheckoutServiceServer).GetOrdersDetailsByUserId(ctx, req.(*GetOrdersDetailsByUserIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CheckoutService_ProcessPayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ProcessPaymentRequest)
 	if err := dec(in); err != nil {
@@ -205,6 +238,10 @@ var CheckoutService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOrderDetails",
 			Handler:    _CheckoutService_GetOrderDetails_Handler,
+		},
+		{
+			MethodName: "GetOrdersDetailsByUserId",
+			Handler:    _CheckoutService_GetOrdersDetailsByUserId_Handler,
 		},
 		{
 			MethodName: "ProcessPayment",
