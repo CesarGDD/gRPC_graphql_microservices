@@ -1,6 +1,6 @@
 
 query GetOrdersDetailsByUserId($input: GetOrdersDetailsByUserIdInput!) {
-  GetOrdersDetailsByUserId(input: $input) {
+  getOrdersDetailsByUserId(input: $input) {
     orderId
     orderItems {
       productId

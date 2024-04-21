@@ -11,10 +11,6 @@ type User {
   orders: [OrderDetails!]
 }
 
-type UserResponse {
-  user: User!
-}
-
 input RegisterUserInput {
   username: String!
   password: String!

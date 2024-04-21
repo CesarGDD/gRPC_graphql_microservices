@@ -48,7 +48,6 @@ type ResolverRoot interface {
 	ProductItem() ProductItemResolver
 	Query() QueryResolver
 	User() UserResolver
-	UserResponse() UserResponseResolver
 }
 
 type DirectiveRoot struct {
@@ -147,10 +146,6 @@ type ComplexityRoot struct {
 		UserId   func(childComplexity int) int
 		Username func(childComplexity int) int
 	}
-
-	UserResponse struct {
-		User func(childComplexity int) int
-	}
 }
 
 type MutationResolver interface {
@@ -180,18 +175,15 @@ type QueryResolver interface {
 	GetOrderDetails(ctx context.Context, input model.GetOrderDetailsInput) (*model.Order, error)
 	GetOrdersDetailsByUserID(ctx context.Context, input model.GetOrdersDetailsByUserIDInput) ([]*checkout.OrderDetails, error)
 	GetPaymentDetails(ctx context.Context, input model.GetPaymentDetailsInput) (*model.PaymentDetails, error)
-	GetUser(ctx context.Context, userID int) (*usermanagementpb.UserResponse, error)
-	GetUsers(ctx context.Context) ([]*usermanagementpb.UserResponse, error)
-	GetUserByUsername(ctx context.Context, username string) (*usermanagementpb.UserResponse, error)
+	GetUser(ctx context.Context, userID int) (*usermanagementpb.User, error)
+	GetUsers(ctx context.Context) ([]*usermanagementpb.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*usermanagementpb.User, error)
 	GetCart(ctx context.Context, input model.GetCartInput) (*model.CartResponse, error)
 }
 type UserResolver interface {
 	Role(ctx context.Context, obj *usermanagementpb.User) (model.Role, error)
 	Products(ctx context.Context, obj *usermanagementpb.User) ([]*productspb.Product, error)
 	Orders(ctx context.Context, obj *usermanagementpb.User) ([]*checkout.OrderDetails, error)
-}
-type UserResponseResolver interface {
-	User(ctx context.Context, obj *usermanagementpb.UserResponse) (*usermanagementpb.User, error)
 }
 
 type executableSchema struct {
@@ -542,12 +534,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetOrderDetails(childComplexity, args["input"].(model.GetOrderDetailsInput)), true
 
-	case "Query.GetOrdersDetailsByUserId":
+	case "Query.getOrdersDetailsByUserId":
 		if e.complexity.Query.GetOrdersDetailsByUserID == nil {
 			break
 		}
 
-		args, err := ec.field_Query_GetOrdersDetailsByUserId_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getOrdersDetailsByUserId_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -690,13 +682,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Username(childComplexity), true
-
-	case "UserResponse.user":
-		if e.complexity.UserResponse.User == nil {
-			break
-		}
-
-		return e.complexity.UserResponse.User(childComplexity), true
 
 	}
 	return 0, false
@@ -1023,21 +1008,6 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_GetOrdersDetailsByUserId_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.GetOrdersDetailsByUserIDInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetOrdersDetailsByUserIdInput2graphql_apiᚋgraphᚋmodelᚐGetOrdersDetailsByUserIDInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1075,6 +1045,21 @@ func (ec *executionContext) field_Query_getOrderDetails_args(ctx context.Context
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNGetOrderDetailsInput2graphql_apiᚋgraphᚋmodelᚐGetOrderDetailsInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getOrdersDetailsByUserId_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.GetOrdersDetailsByUserIDInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNGetOrdersDetailsByUserIdInput2graphql_apiᚋgraphᚋmodelᚐGetOrdersDetailsByUserIDInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3237,8 +3222,8 @@ func (ec *executionContext) fieldContext_Query_getOrderDetails(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_GetOrdersDetailsByUserId(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_GetOrdersDetailsByUserId(ctx, field)
+func (ec *executionContext) _Query_getOrdersDetailsByUserId(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getOrdersDetailsByUserId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3268,7 +3253,7 @@ func (ec *executionContext) _Query_GetOrdersDetailsByUserId(ctx context.Context,
 	return ec.marshalNOrderDetails2ᚕᚖgraphql_apiᚋprotosᚋcheckoutpbᚐOrderDetailsᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_GetOrdersDetailsByUserId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getOrdersDetailsByUserId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -3297,7 +3282,7 @@ func (ec *executionContext) fieldContext_Query_GetOrdersDetailsByUserId(ctx cont
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_GetOrdersDetailsByUserId_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_getOrdersDetailsByUserId_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3389,9 +3374,9 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*usermanagementpb.UserResponse)
+	res := resTmp.(*usermanagementpb.User)
 	fc.Result = res
-	return ec.marshalNUserResponse2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUserResponse(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3402,10 +3387,18 @@ func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "user":
-				return ec.fieldContext_UserResponse_user(ctx, field)
+			case "userId":
+				return ec.fieldContext_User_userId(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "products":
+				return ec.fieldContext_User_products(ctx, field)
+			case "orders":
+				return ec.fieldContext_User_orders(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	defer func() {
@@ -3448,9 +3441,9 @@ func (ec *executionContext) _Query_getUsers(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*usermanagementpb.UserResponse)
+	res := resTmp.([]*usermanagementpb.User)
 	fc.Result = res
-	return ec.marshalNUserResponse2ᚕᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUserResponseᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3461,10 +3454,18 @@ func (ec *executionContext) fieldContext_Query_getUsers(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "user":
-				return ec.fieldContext_UserResponse_user(ctx, field)
+			case "userId":
+				return ec.fieldContext_User_userId(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "products":
+				return ec.fieldContext_User_products(ctx, field)
+			case "orders":
+				return ec.fieldContext_User_orders(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -3496,9 +3497,9 @@ func (ec *executionContext) _Query_getUserByUsername(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*usermanagementpb.UserResponse)
+	res := resTmp.(*usermanagementpb.User)
 	fc.Result = res
-	return ec.marshalNUserResponse2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUserResponse(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getUserByUsername(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3509,10 +3510,18 @@ func (ec *executionContext) fieldContext_Query_getUserByUsername(ctx context.Con
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "user":
-				return ec.fieldContext_UserResponse_user(ctx, field)
+			case "userId":
+				return ec.fieldContext_User_userId(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "products":
+				return ec.fieldContext_User_products(ctx, field)
+			case "orders":
+				return ec.fieldContext_User_orders(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	defer func() {
@@ -4142,62 +4151,6 @@ func (ec *executionContext) fieldContext_User_orders(ctx context.Context, field 
 				return ec.fieldContext_OrderDetails_orderItems(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type OrderDetails", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UserResponse_user(ctx context.Context, field graphql.CollectedField, obj *usermanagementpb.UserResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserResponse_user(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.UserResponse().User(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*usermanagementpb.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserResponse_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserResponse",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "userId":
-				return ec.fieldContext_User_userId(ctx, field)
-			case "username":
-				return ec.fieldContext_User_username(ctx, field)
-			case "role":
-				return ec.fieldContext_User_role(ctx, field)
-			case "products":
-				return ec.fieldContext_User_products(ctx, field)
-			case "orders":
-				return ec.fieldContext_User_orders(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -7259,7 +7212,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "GetOrdersDetailsByUserId":
+		case "getOrdersDetailsByUserId":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -7268,7 +7221,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_GetOrdersDetailsByUserId(ctx, field)
+				res = ec._Query_getOrdersDetailsByUserId(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -7610,76 +7563,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._User_orders(ctx, field, obj)
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var userResponseImplementors = []string{"UserResponse"}
-
-func (ec *executionContext) _UserResponse(ctx context.Context, sel ast.SelectionSet, obj *usermanagementpb.UserResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, userResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("UserResponse")
-		case "user":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._UserResponse_user(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
 				return res
 			}
 
@@ -8523,21 +8406,7 @@ func (ec *executionContext) marshalNUser2graphql_apiᚋprotosᚋusermanagementpb
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUser(ctx context.Context, sel ast.SelectionSet, v *usermanagementpb.User) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNUserResponse2graphql_apiᚋprotosᚋusermanagementpbᚐUserResponse(ctx context.Context, sel ast.SelectionSet, v usermanagementpb.UserResponse) graphql.Marshaler {
-	return ec._UserResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNUserResponse2ᚕᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUserResponseᚄ(ctx context.Context, sel ast.SelectionSet, v []*usermanagementpb.UserResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*usermanagementpb.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -8561,7 +8430,7 @@ func (ec *executionContext) marshalNUserResponse2ᚕᚖgraphql_apiᚋprotosᚋus
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUserResponse2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUserResponse(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -8581,14 +8450,14 @@ func (ec *executionContext) marshalNUserResponse2ᚕᚖgraphql_apiᚋprotosᚋus
 	return ret
 }
 
-func (ec *executionContext) marshalNUserResponse2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUserResponse(ctx context.Context, sel ast.SelectionSet, v *usermanagementpb.UserResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUser(ctx context.Context, sel ast.SelectionSet, v *usermanagementpb.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._UserResponse(ctx, sel, v)
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

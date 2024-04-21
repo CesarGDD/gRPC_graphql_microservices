@@ -1,4 +1,3 @@
-
 import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
@@ -6,12 +5,10 @@ const config: CodegenConfig = {
   schema: "http://localhost:8080/query",
   documents: "src/**/*.graphql",
   generates: {
-    "src/graphql/generated/": {
+    "src/graphql/generated/": {  // Specify a file, not a directory
       preset: "client",
       plugins: [
-        "typescript",
-        "typescript-operations",
-        "typescript-urql"
+        "typescript-urql",
       ],
       config: {
         withHooks: true
@@ -19,6 +16,5 @@ const config: CodegenConfig = {
     }
   }
 };
-
 
 export default config;

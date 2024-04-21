@@ -98,19 +98,10 @@ func (r *userResolver) Orders(ctx context.Context, obj *usermanagementpb.User) (
 	return res.OrdersDetails, nil
 }
 
-// User is the resolver for the user field.
-func (r *userResponseResolver) User(ctx context.Context, obj *usermanagementpb.UserResponse) (*usermanagementpb.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
-}
-
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
-// UserResponse returns UserResponseResolver implementation.
-func (r *Resolver) UserResponse() UserResponseResolver { return &userResponseResolver{r} }
-
 type userResolver struct{ *Resolver }
-type userResponseResolver struct{ *Resolver }
 
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have
@@ -118,9 +109,3 @@ type userResponseResolver struct{ *Resolver }
 //   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //     it when you're done.
 //   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *userResponseResolver) Role(ctx context.Context, obj *usermanagementpb.UserResponse) (model.Role, error) {
-	return mapStringToRole(obj.Role)
-}
-func (r *userResolver) Porducts(ctx context.Context, obj *usermanagementpb.User) ([]*productspb.Product, error) {
-	panic(fmt.Errorf("not implemented: Porducts - porducts"))
-}

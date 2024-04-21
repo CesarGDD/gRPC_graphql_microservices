@@ -1,8 +1,14 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { useGetUsersQuery } from './graphql/generated/graphql';
 
 function App() {
+  const [{ data, fetching, error }] = useGetUsersQuery();
+
+  if (fetching) return <p>Loading...</p>;
+  if (error) return <p>Oh no... {error.message}</p>;
+
   return (
     <div className="App">
       <header className="App-header">
@@ -10,14 +16,11 @@ function App() {
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+      <div>
+        {data?.getUsers.map(user => (
+          <p key={user.userId}>{user.username}</p>
+        ))}
+      </div>
       </header>
     </div>
   );

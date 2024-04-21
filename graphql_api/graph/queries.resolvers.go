@@ -144,7 +144,7 @@ func (r *queryResolver) GetPaymentDetails(ctx context.Context, input model.GetPa
 }
 
 // GetUser is the resolver for the getUser field.
-func (r *queryResolver) GetUser(ctx context.Context, userID int) (*usermanagementpb.UserResponse, error) {
+func (r *queryResolver) GetUser(ctx context.Context, userID int) (*usermanagementpb.User, error) {
 	fmt.Println("Request to get user:", userID)
 
 	res, err := r.UserManagementClient.GetUser(ctx, &usermanagementpb.GetUserRequest{
@@ -161,11 +161,15 @@ func (r *queryResolver) GetUser(ctx context.Context, userID int) (*usermanagemen
 	}
 
 	fmt.Println("user retrieved successfully:", res.User)
-	return res.User, nil
+	return &usermanagementpb.User{
+		UserId: res.User.UserId,
+		Username: res.User.Username,
+		Role: res.User.Role,
+	}, nil
 }
 
 // GetUsers is the resolver for the getUsers field.
-func (r *queryResolver) GetUsers(ctx context.Context) ([]*usermanagementpb.UserResponse, error) {
+func (r *queryResolver) GetUsers(ctx context.Context) ([]*usermanagementpb.User, error) {
 	fmt.Println("Request to get users:")
 
 	res, err := r.UserManagementClient.GetUsers(ctx, &usermanagementpb.GetUsersRequest{})
@@ -179,12 +183,21 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*usermanagementpb.UserR
 		return nil, gqlerror.Errorf("No user found.")
 	}
 
+	var users []*usermanagementpb.User
+	for _, user := range res.Users {
+		users = append(users, &usermanagementpb.User{
+			UserId: user.UserId,
+			Username: user.Username,
+			Role: user.Role,
+		})
+	}
+
 	fmt.Println("user retrieved successfully:", res.Users)
-	return res.Users, nil
+	return users, nil
 }
 
 // GetUserByUsername is the resolver for the getUserByUsername field.
-func (r *queryResolver) GetUserByUsername(ctx context.Context, username string) (*usermanagementpb.UserResponse, error) {
+func (r *queryResolver) GetUserByUsername(ctx context.Context, username string) (*usermanagementpb.User, error) {
 	fmt.Println("Request to get user:", username)
 
 	res, err := r.UserManagementClient.GetUserByUsername(ctx, &usermanagementpb.GetUserByUsernameRequest{
@@ -201,7 +214,11 @@ func (r *queryResolver) GetUserByUsername(ctx context.Context, username string) 
 	}
 
 	fmt.Println("user retrieved successfully:", res.User)
-	return res.User, nil
+	return &usermanagementpb.User{
+		UserId: res.User.UserId,
+		Username: res.User.Username,
+		Role: res.User.Role,
+	}, nil
 }
 
 // GetCart is the resolver for the getCart field.

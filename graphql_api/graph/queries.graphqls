@@ -6,13 +6,13 @@ type Query {
 
 # orders
   getOrderDetails(input: GetOrderDetailsInput!): Order!
-  GetOrdersDetailsByUserId(input: GetOrdersDetailsByUserIdInput!): [OrderDetails!]!
+  getOrdersDetailsByUserId(input: GetOrdersDetailsByUserIdInput!): [OrderDetails!]!
   getPaymentDetails(input: GetPaymentDetailsInput!): PaymentDetails!
 
 # users
-  getUser(userId: Int!): UserResponse!
-  getUsers: [UserResponse!]!
-  getUserByUsername(username: String!): UserResponse!
+  getUser(userId: Int!): User!
+  getUsers: [User!]!
+  getUserByUsername(username: String!): User!
 
 # cart
   getCart(input: GetCartInput!): CartResponse!
