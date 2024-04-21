@@ -1,0 +1,76 @@
+query GetProducts {
+  getProducts {
+    product {
+      description
+      name
+      price
+      productId
+      title
+      url
+      userId
+      userOwner {
+        username
+        userId
+      }
+    }
+  }
+}
+
+query getProductByName($name: String!) {
+  getProductByName(name: $name) {
+    product {
+      description
+      name
+      price
+      productId
+      title
+      url
+      userId
+      userOwner {
+        userId
+        username
+      }
+    }
+  }
+}
+
+query GetProduct($productId: Int!) {
+  getProduct(productId: $productId) {
+    product {
+      description
+      name
+      price
+      productId
+      title
+      url
+      userId
+      userOwner {
+        userId
+        username
+      }
+    }
+  }
+}
+
+# mutations
+
+mutation CreateProduct($input: NewProductInput!) {
+  createProduct(input: $input) {
+    message
+    success
+  }
+}
+
+mutation DeleteProduct($productId: Int!) {
+  deleteProduct(productId: $productId) {
+    message
+    success
+  }
+}
+
+mutation UpdateProduct($input: UpdateProductInput!) {
+  updateProduct(input: $input) {
+    message
+    success
+  }
+}

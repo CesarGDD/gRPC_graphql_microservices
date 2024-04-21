@@ -45,6 +45,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Product() ProductResolver
+	ProductItem() ProductItemResolver
 	Query() QueryResolver
 	User() UserResolver
 	UserResponse() UserResponseResolver
@@ -107,6 +108,7 @@ type ComplexityRoot struct {
 	}
 
 	ProductItem struct {
+		Product   func(childComplexity int) int
 		ProductId func(childComplexity int) int
 		Quantity  func(childComplexity int) int
 	}
@@ -147,9 +149,7 @@ type ComplexityRoot struct {
 	}
 
 	UserResponse struct {
-		Role     func(childComplexity int) int
-		UserId   func(childComplexity int) int
-		Username func(childComplexity int) int
+		User func(childComplexity int) int
 	}
 }
 
@@ -170,6 +170,9 @@ type MutationResolver interface {
 type ProductResolver interface {
 	UserOwner(ctx context.Context, obj *productspb.Product) (*usermanagementpb.User, error)
 }
+type ProductItemResolver interface {
+	Product(ctx context.Context, obj *shoppingcart.ProductItem) (*productspb.Product, error)
+}
 type QueryResolver interface {
 	GetProduct(ctx context.Context, productID int) (*productspb.ProductResponse, error)
 	GetProductByName(ctx context.Context, name string) (*productspb.ProductResponse, error)
@@ -188,7 +191,7 @@ type UserResolver interface {
 	Orders(ctx context.Context, obj *usermanagementpb.User) ([]*checkout.OrderDetails, error)
 }
 type UserResponseResolver interface {
-	Role(ctx context.Context, obj *usermanagementpb.UserResponse) (model.Role, error)
+	User(ctx context.Context, obj *usermanagementpb.UserResponse) (*usermanagementpb.User, error)
 }
 
 type executableSchema struct {
@@ -487,6 +490,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Product.UserOwner(childComplexity), true
 
+	case "ProductItem.product":
+		if e.complexity.ProductItem.Product == nil {
+			break
+		}
+
+		return e.complexity.ProductItem.Product(childComplexity), true
+
 	case "ProductItem.productId":
 		if e.complexity.ProductItem.ProductId == nil {
 			break
@@ -681,26 +691,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Username(childComplexity), true
 
-	case "UserResponse.role":
-		if e.complexity.UserResponse.Role == nil {
+	case "UserResponse.user":
+		if e.complexity.UserResponse.User == nil {
 			break
 		}
 
-		return e.complexity.UserResponse.Role(childComplexity), true
-
-	case "UserResponse.userId":
-		if e.complexity.UserResponse.UserId == nil {
-			break
-		}
-
-		return e.complexity.UserResponse.UserId(childComplexity), true
-
-	case "UserResponse.username":
-		if e.complexity.UserResponse.Username == nil {
-			break
-		}
-
-		return e.complexity.UserResponse.Username(childComplexity), true
+		return e.complexity.UserResponse.User(childComplexity), true
 
 	}
 	return 0, false
@@ -2892,6 +2888,68 @@ func (ec *executionContext) fieldContext_ProductItem_quantity(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _ProductItem_product(ctx context.Context, field graphql.CollectedField, obj *shoppingcart.ProductItem) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProductItem_product(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ProductItem().Product(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*productspb.Product)
+	fc.Result = res
+	return ec.marshalNProduct2ᚖgraphql_apiᚋprotosᚋproductspbᚐProduct(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProductItem_product(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProductItem",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "productId":
+				return ec.fieldContext_Product_productId(ctx, field)
+			case "userId":
+				return ec.fieldContext_Product_userId(ctx, field)
+			case "name":
+				return ec.fieldContext_Product_name(ctx, field)
+			case "url":
+				return ec.fieldContext_Product_url(ctx, field)
+			case "price":
+				return ec.fieldContext_Product_price(ctx, field)
+			case "description":
+				return ec.fieldContext_Product_description(ctx, field)
+			case "title":
+				return ec.fieldContext_Product_title(ctx, field)
+			case "userOwner":
+				return ec.fieldContext_Product_userOwner(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ProductResponse_product(ctx context.Context, field graphql.CollectedField, obj *productspb.ProductResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ProductResponse_product(ctx, field)
 	if err != nil {
@@ -3344,12 +3402,8 @@ func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, fiel
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "userId":
-				return ec.fieldContext_UserResponse_userId(ctx, field)
-			case "username":
-				return ec.fieldContext_UserResponse_username(ctx, field)
-			case "role":
-				return ec.fieldContext_UserResponse_role(ctx, field)
+			case "user":
+				return ec.fieldContext_UserResponse_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -3407,12 +3461,8 @@ func (ec *executionContext) fieldContext_Query_getUsers(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "userId":
-				return ec.fieldContext_UserResponse_userId(ctx, field)
-			case "username":
-				return ec.fieldContext_UserResponse_username(ctx, field)
-			case "role":
-				return ec.fieldContext_UserResponse_role(ctx, field)
+			case "user":
+				return ec.fieldContext_UserResponse_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -3459,12 +3509,8 @@ func (ec *executionContext) fieldContext_Query_getUserByUsername(ctx context.Con
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "userId":
-				return ec.fieldContext_UserResponse_userId(ctx, field)
-			case "username":
-				return ec.fieldContext_UserResponse_username(ctx, field)
-			case "role":
-				return ec.fieldContext_UserResponse_role(ctx, field)
+			case "user":
+				return ec.fieldContext_UserResponse_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -3848,6 +3894,8 @@ func (ec *executionContext) fieldContext_ShoppingCart_items(ctx context.Context,
 				return ec.fieldContext_ProductItem_productId(ctx, field)
 			case "quantity":
 				return ec.fieldContext_ProductItem_quantity(ctx, field)
+			case "product":
+				return ec.fieldContext_ProductItem_product(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProductItem", field.Name)
 		},
@@ -4099,8 +4147,8 @@ func (ec *executionContext) fieldContext_User_orders(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _UserResponse_userId(ctx context.Context, field graphql.CollectedField, obj *usermanagementpb.UserResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserResponse_userId(ctx, field)
+func (ec *executionContext) _UserResponse_user(ctx context.Context, field graphql.CollectedField, obj *usermanagementpb.UserResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserResponse_user(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4113,7 +4161,7 @@ func (ec *executionContext) _UserResponse_userId(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.UserId, nil
+		return ec.resolvers.UserResponse().User(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4125,107 +4173,31 @@ func (ec *executionContext) _UserResponse_userId(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(*usermanagementpb.User)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgraphql_apiᚋprotosᚋusermanagementpbᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UserResponse_userId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UserResponse_username(ctx context.Context, field graphql.CollectedField, obj *usermanagementpb.UserResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserResponse_username(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Username, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserResponse_username(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UserResponse_role(ctx context.Context, field graphql.CollectedField, obj *usermanagementpb.UserResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserResponse_role(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.UserResponse().Role(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.Role)
-	fc.Result = res
-	return ec.marshalNRole2graphql_apiᚋgraphᚋmodelᚐRole(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserResponse_role(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UserResponse_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserResponse",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Role does not have child fields")
+			switch field.Name {
+			case "userId":
+				return ec.fieldContext_User_userId(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "products":
+				return ec.fieldContext_User_products(ctx, field)
+			case "orders":
+				return ec.fieldContext_User_orders(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -7075,13 +7047,49 @@ func (ec *executionContext) _ProductItem(ctx context.Context, sel ast.SelectionS
 		case "productId":
 			out.Values[i] = ec._ProductItem_productId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "quantity":
 			out.Values[i] = ec._ProductItem_quantity(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "product":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ProductItem_product(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7659,17 +7667,7 @@ func (ec *executionContext) _UserResponse(ctx context.Context, sel ast.Selection
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("UserResponse")
-		case "userId":
-			out.Values[i] = ec._UserResponse_userId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "username":
-			out.Values[i] = ec._UserResponse_username(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "role":
+		case "user":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -7678,7 +7676,7 @@ func (ec *executionContext) _UserResponse(ctx context.Context, sel ast.Selection
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._UserResponse_role(ctx, field, obj)
+				res = ec._UserResponse_user(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -8314,6 +8312,10 @@ func (ec *executionContext) marshalNPaymentDetails2ᚖgraphql_apiᚋgraphᚋmode
 func (ec *executionContext) unmarshalNProcessPaymentInput2graphql_apiᚋgraphᚋmodelᚐProcessPaymentInput(ctx context.Context, v interface{}) (model.ProcessPaymentInput, error) {
 	res, err := ec.unmarshalInputProcessPaymentInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProduct2graphql_apiᚋprotosᚋproductspbᚐProduct(ctx context.Context, sel ast.SelectionSet, v productspb.Product) graphql.Marshaler {
+	return ec._Product(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNProduct2ᚖgraphql_apiᚋprotosᚋproductspbᚐProduct(ctx context.Context, sel ast.SelectionSet, v *productspb.Product) graphql.Marshaler {

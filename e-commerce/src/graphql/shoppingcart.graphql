@@ -1,0 +1,51 @@
+query GetCart($input: GetCartInput!) {
+  getCart(input: $input) {
+    cart {
+      items {
+        productId
+        quantity
+        product {
+          name
+          price
+          url
+          userOwner {
+            username
+            userId
+          }
+        }
+      }
+    }
+  }
+}
+
+
+# Mutations
+
+mutation AddItem($input: AddItemInput!) {
+  addItem(input: $input) {
+    message
+    success
+  }
+}
+
+mutation ClearCart($input: ClearCartInput!) {
+  clearCart(input: $input) {
+    message
+    success
+  }
+}
+
+mutation RemoveItem($input: RemoveItemInput!) {
+  removeItem(input: $input) {
+    message
+    success
+  }
+}
+
+mutation UpdateItem($input: UpdateItemInput!) {
+  updateItem(input: $input) {
+    message
+    success
+  }
+}
+

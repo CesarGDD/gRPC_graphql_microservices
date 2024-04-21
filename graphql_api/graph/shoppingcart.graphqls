@@ -1,6 +1,7 @@
 type ProductItem {
   productId: Int!
   quantity: Int!
+  product: Product!
 }
 
 type CartResponse {

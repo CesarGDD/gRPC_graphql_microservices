@@ -1,0 +1,52 @@
+
+query GetOrdersDetailsByUserId($input: GetOrdersDetailsByUserIdInput!) {
+  GetOrdersDetailsByUserId(input: $input) {
+    orderId
+    orderItems {
+      productId
+      quantity
+    }
+    status
+    totalPrice
+    userId
+  }
+}
+
+query getOrderDetails($input: GetOrderDetailsInput!) {
+  getOrderDetails(input: $input) {
+    orderDetails {
+      orderId
+      orderItems {
+        productId
+        quantity
+      }
+      status
+      totalPrice
+      userId
+    }
+  }
+}
+
+query getPaymentDetails($input: GetPaymentDetailsInput!) {
+  getPaymentDetails(input: $input) {
+    paymentMethod
+  }
+}
+
+# Mutations
+
+mutation createOrder($input: CreateOrderInput!) {
+  createOrder(input: $input) {
+    message
+    success
+  }
+}
+
+mutation processPayment($input: ProcessPaymentInput!) {
+  processPayment(input: $input) {
+    message
+    success
+  }
+}
+
+

@@ -1,0 +1,53 @@
+query GetUsers {
+  getUsers {
+    user {
+      username
+      userId
+      role
+    }
+  }
+}
+
+query GetUser($userId: Int!) {
+  getUser(userId: $userId) {
+    user {
+      username
+      userId
+      role
+    }
+  }
+}
+
+
+query GetUserByUsername($username: String!) {
+  getUserByUsername(username: $username) {
+    user {
+      username
+      userId
+      role
+    }
+  }
+}
+
+# Mutations
+
+mutation RegisterUser($input: RegisterUserInput!) {
+  registerUser(input: $input) {
+    message
+    success
+  }
+}
+
+mutation UpdateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    message
+    success
+  }
+}
+
+mutation DeleteUser($userId: Int!) {
+  deleteUser(userId: $userId) {
+    message
+    success
+  }
+}
