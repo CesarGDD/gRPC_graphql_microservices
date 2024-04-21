@@ -12,11 +12,12 @@ message Response {
 // Product message represents the data model for a product.
 message Product {
     int32 product_id = 1; // Unique identifier for the product
-    string name = 2; // Name of the product
-    string url = 3; // URL for the product image
-    int32 price = 4; // Price of the product
-    string description = 5; // Description of the product
-    string title = 6; // Title of the product
+    int32 user_id = 2;// Unique identifier for the user
+    string name = 3; // Name of the product
+    string url = 4; // URL for the product image
+    int32 price = 5; // Price of the product
+    string description = 6; // Description of the product
+    string title = 7; // Title of the product
 }
 
 // ProductResponse message represents the data model for a product response.
@@ -27,10 +28,11 @@ message ProductResponse {
 // Request message for creating a new product.
 message CreateProductRequest {
     string name = 1; // Name of the product
-    string url = 2; // URL for the product image
-    int32 price = 3; // Price of the product
-    string description = 4; // Description of the product
-    string title = 5; // Title of the product
+    int32 user_id = 2;// Unique identifier for the user
+    string url = 3; // URL for the product image
+    int32 price = 4; // Price of the product
+    string description = 5; // Description of the product
+    string title = 6; // Title of the product
 }
 
 // Response message for creating a new product.
@@ -62,6 +64,14 @@ message GetProductByNameResponse {
     ProductResponse product = 1;
 }
 
+message GetProductByUserIdRequest {
+    int32 user_id = 1;
+}
+
+message GetProductByUserIdResponse {
+    repeated ProductResponse product = 1;
+}
+
 message GetProductsRequest {
 }
 
@@ -85,6 +95,7 @@ service ProductService {
     rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
     rpc GetProduct(GetProductRequest) returns (GetProductResponse);
     rpc GetProductByName(GetProductByNameRequest) returns (GetProductByNameResponse);
+    rpc GetProductByUserId(GetProductByUserIdRequest) returns (GetProductByUserIdResponse);
     rpc GetProducts(GetProductsRequest) returns (GetProductsResponse);
     rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
 }

@@ -10,11 +10,12 @@ import (
 )
 
 const createProduct = `-- name: CreateProduct :exec
-INSERT INTO products (name, url, title, description, price)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO products (user_id, name, url, title, description, price)
+VALUES ($1, $2, $3, $4, $5, $6)
 `
 
 type CreateProductParams struct {
+	UserID      int32
 	Name        string
 	Url         string
 	Title       string
@@ -24,6 +25,7 @@ type CreateProductParams struct {
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) error {
 	_, err := q.db.Exec(ctx, createProduct,
+		arg.UserID,
 		arg.Name,
 		arg.Url,
 		arg.Title,
@@ -43,7 +45,7 @@ func (q *Queries) DeleteProduct(ctx context.Context, productID int32) error {
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT product_id, name, url, title, description, price FROM products WHERE product_id = $1
+SELECT product_id, user_id, name, url, title, description, price FROM products WHERE product_id = $1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, productID int32) (Product, error) {
@@ -51,6 +53,7 @@ func (q *Queries) GetProduct(ctx context.Context, productID int32) (Product, err
 	var i Product
 	err := row.Scan(
 		&i.ProductID,
+		&i.UserID,
 		&i.Name,
 		&i.Url,
 		&i.Title,
@@ -61,7 +64,7 @@ func (q *Queries) GetProduct(ctx context.Context, productID int32) (Product, err
 }
 
 const getProductByName = `-- name: GetProductByName :one
-SELECT product_id, name, url, title, description, price FROM products WHERE name = $1
+SELECT product_id, user_id, name, url, title, description, price FROM products WHERE name = $1
 `
 
 func (q *Queries) GetProductByName(ctx context.Context, name string) (Product, error) {
@@ -69,6 +72,7 @@ func (q *Queries) GetProductByName(ctx context.Context, name string) (Product, e
 	var i Product
 	err := row.Scan(
 		&i.ProductID,
+		&i.UserID,
 		&i.Name,
 		&i.Url,
 		&i.Title,
@@ -78,8 +82,40 @@ func (q *Queries) GetProductByName(ctx context.Context, name string) (Product, e
 	return i, err
 }
 
+const getProductByUserId = `-- name: GetProductByUserId :many
+SELECT product_id, user_id, name, url, title, description, price FROM products WHERE user_id = $1
+`
+
+func (q *Queries) GetProductByUserId(ctx context.Context, userID int32) ([]Product, error) {
+	rows, err := q.db.Query(ctx, getProductByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Product
+	for rows.Next() {
+		var i Product
+		if err := rows.Scan(
+			&i.ProductID,
+			&i.UserID,
+			&i.Name,
+			&i.Url,
+			&i.Title,
+			&i.Description,
+			&i.Price,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProducts = `-- name: GetProducts :many
-SELECT product_id, name, url, title, description, price FROM products
+SELECT product_id, user_id, name, url, title, description, price FROM products
 `
 
 // Get All Products
@@ -94,6 +130,7 @@ func (q *Queries) GetProducts(ctx context.Context) ([]Product, error) {
 		var i Product
 		if err := rows.Scan(
 			&i.ProductID,
+			&i.UserID,
 			&i.Name,
 			&i.Url,
 			&i.Title,
@@ -111,15 +148,16 @@ func (q *Queries) GetProducts(ctx context.Context) ([]Product, error) {
 }
 
 const updateProduct = `-- name: UpdateProduct :exec
-UPDATE products SET name = $2, url = $3, price = $4
+UPDATE products SET name = $2, url = $3, description = $4, price = $5
 WHERE product_id = $1
 `
 
 type UpdateProductParams struct {
-	ProductID int32
-	Name      string
-	Url       string
-	Price     int32
+	ProductID   int32
+	Name        string
+	Url         string
+	Description string
+	Price       int32
 }
 
 func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) error {
@@ -127,6 +165,7 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) er
 		arg.ProductID,
 		arg.Name,
 		arg.Url,
+		arg.Description,
 		arg.Price,
 	)
 	return err

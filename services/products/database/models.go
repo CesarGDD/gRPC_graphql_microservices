@@ -8,6 +8,7 @@ import ()
 
 type Product struct {
 	ProductID   int32
+	UserID      int32
 	Name        string
 	Url         string
 	Title       string
