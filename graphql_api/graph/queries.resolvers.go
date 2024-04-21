@@ -147,7 +147,33 @@ func (r *queryResolver) GetOrderDetails(ctx context.Context, input model.GetOrde
 
 // GetOrdersDetailsByUserID is the resolver for the GetOrdersDetailsByUserId field.
 func (r *queryResolver) GetOrdersDetailsByUserID(ctx context.Context, input model.GetOrdersDetailsByUserIDInput) ([]*checkout.OrderDetails, error) {
-	panic(fmt.Errorf("not implemented: GetOrdersDetailsByUserID - GetOrdersDetailsByUserId"))
+	fmt.Println("Request to get order details by userId:", input.UserID)
+
+	res, err := r.CheckoutClient.GetOrdersDetailsByUserId(ctx, &checkout.GetOrdersDetailsByUserIdRequest{
+		UserId: int32(input.UserID),
+	})
+	if err != nil {
+		fmt.Printf("Error fetching order %v\n", err)
+		// Convert gRPC error to GraphQL error
+		e, ok := status.FromError(err)
+		if ok {
+			// gRPC specific error handling
+			fmt.Printf("gRPC error status: %v\n", e.Message())
+			graphql.AddError(ctx, gqlerror.Errorf("gRPC error: %s", e.Message()))
+		} else {
+			// General error handling
+			fmt.Printf("Non-gRPC error: %v\n", err)
+			graphql.AddError(ctx, gqlerror.Errorf("Internal server error: %v", err))
+		}
+		return nil, gqlerror.Errorf("Failed to fetch order details by userId.")
+	}
+	if res == nil || res.OrdersDetails == nil {
+		fmt.Printf("No orders by userId found\n")
+		graphql.AddError(ctx, gqlerror.Errorf("No orders  by userId found"))
+		return nil, gqlerror.Errorf("No orders by userId found.")
+	}
+	fmt.Println("Order retrieved successfully:")
+	return res.OrdersDetails, nil
 }
 
 // GetPaymentDetails is the resolver for the getPaymentDetails field.
