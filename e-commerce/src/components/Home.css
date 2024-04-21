@@ -1,0 +1,29 @@
+/* Home.css */
+.products-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.product-card {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 30%;
+}
+
+.product-image {
+    width: 100%;
+}
+
+.product-title {
+    font-size: 1.5em;
+}
+
+.product-description {
+    font-size: 1em;
+    color: #666;
+}
+
+.product-price {
+    font-weight: bold;
+}
