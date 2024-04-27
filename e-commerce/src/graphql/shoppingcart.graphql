@@ -1,20 +1,19 @@
 query GetCart($input: GetCartInput!) {
   getCart(input: $input) {
-    cart {
-      items {
+    items {
+      product {
+        description
+        name
+        price
         productId
-        quantity
-        product {
-          name
-          price
-          url
-          userOwner {
-            username
-            userId
-          }
-        }
+        title
+        url
+        userId
       }
+      productId
+      quantity
     }
+    userId
   }
 }
 

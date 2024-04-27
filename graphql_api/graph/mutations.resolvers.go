@@ -8,10 +8,12 @@ import (
 	"context"
 	"fmt"
 	"graphql_api/graph/model"
+	tools "graphql_api/pkg/utils"
 	checkout "graphql_api/protos/checkoutpb"
 	"graphql_api/protos/productspb"
 	shoppingcart "graphql_api/protos/shoppingcartpb"
 	"graphql_api/protos/usermanagementpb"
+	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -159,9 +161,10 @@ func (r *mutationResolver) ProcessPayment(ctx context.Context, input model.Proce
 	}, nil
 }
 
-// RegisterUser is the resolver for the registerUser field.
-func (r *mutationResolver) RegisterUser(ctx context.Context, input model.RegisterUserInput) (*checkout.Response, error) {
+// SignIn is the resolver for the signIn field.
+func (r *mutationResolver) SignIn(ctx context.Context, input *model.RegisterUserInput) (*model.AuthResponse, error) {
 	fmt.Println("Mutation to register an user:", input)
+	input.Password = tools.HashPassword(input.Password)
 	res, err := r.UserManagementClient.Register(ctx, &usermanagementpb.RegisterRequest{
 		Username: input.Username,
 		Password: input.Password,
@@ -179,10 +182,48 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input model.Registe
 		return nil, gqlerror.Errorf("No user found.")
 	}
 
+	token, err := tools.JwtGenerate(ctx, strconv.FormatInt(int64(res.User.UserId), 10))
+	if err != nil {
+		return nil, err
+	}
+
 	fmt.Println("user registered successfully:", res.Response)
-	return &checkout.Response{
-		Message: res.Response.Message,
-		Success: res.Response.Success,
+	return &model.AuthResponse{
+		Token: token,
+		User:  res.User,
+	}, nil
+}
+
+// Login is the resolver for the login field.
+func (r *mutationResolver) Login(ctx context.Context, input *model.LoginInput) (*model.AuthResponse, error) {
+	fmt.Println("Request to login:", input)
+
+	res, err := r.UserManagementClient.GetUserByUsername(ctx, &usermanagementpb.GetUserByUsernameRequest{
+		Username: input.Username,
+	})
+	if err != nil {
+		fmt.Printf("Error fetching user %s: %v\n", input.Username, err)
+		return nil, handleError(ctx, err, "Error fetching user by username")
+	}
+	if res == nil || res.User == nil {
+		fmt.Printf("No user found for ID %s\n", input.Username)
+		graphql.AddError(ctx, gqlerror.Errorf("No user found with ID %s", input.Username))
+		return nil, gqlerror.Errorf("No user found.")
+	}
+
+	if err := tools.ComparePassword(res.User.PasswordHash, input.Password); err != nil {
+		return nil, err
+	}
+
+	token, err := tools.JwtGenerate(ctx, strconv.FormatInt(int64(res.User.UserId), 10))
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("user logged successfully:", res.User)
+	return &model.AuthResponse{
+		Token: token,
+		User:  res.User,
 	}, nil
 }
 
@@ -354,3 +395,10 @@ func (r *mutationResolver) ClearCart(ctx context.Context, input model.ClearCartI
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.

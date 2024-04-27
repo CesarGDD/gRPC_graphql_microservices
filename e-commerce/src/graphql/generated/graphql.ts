@@ -24,12 +24,6 @@ export type AddItemInput = {
   userId: Scalars['Int']['input'];
 };
 
-export type CartResponse = {
-  __typename?: 'CartResponse';
-  cart: ShoppingCart;
-  success: Scalars['Boolean']['output'];
-};
-
 export type ClearCartInput = {
   userId: Scalars['Int']['input'];
 };
@@ -200,20 +194,15 @@ export type ProductItemInput = {
   quantity: Scalars['Int']['input'];
 };
 
-export type ProductResponse = {
-  __typename?: 'ProductResponse';
-  product: Product;
-};
-
 export type Query = {
   __typename?: 'Query';
-  getCart: CartResponse;
+  getCart: ShoppingCart;
   getOrderDetails: Order;
   getOrdersDetailsByUserId: Array<OrderDetails>;
   getPaymentDetails: PaymentDetails;
-  getProduct: ProductResponse;
-  getProductByName: ProductResponse;
-  getProducts: Array<ProductResponse>;
+  getProduct: Product;
+  getProductByName: Product;
+  getProducts: Array<Product>;
   getUser: User;
   getUserByUsername: User;
   getUsers: Array<User>;
@@ -355,21 +344,21 @@ export type ProcessPaymentMutation = { __typename?: 'Mutation', processPayment: 
 export type GetProductsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProductsQuery = { __typename?: 'Query', getProducts: Array<{ __typename?: 'ProductResponse', product: { __typename?: 'Product', description: string, name: string, price: number, productId: number, title: string, url: string, userId: number, userOwner: { __typename?: 'User', username: string, userId: number } } }> };
+export type GetProductsQuery = { __typename?: 'Query', getProducts: Array<{ __typename?: 'Product', description: string, name: string, price: number, productId: number, title: string, url: string, userId: number, userOwner: { __typename?: 'User', userId: number, username: string } }> };
 
 export type GetProductByNameQueryVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
 
 
-export type GetProductByNameQuery = { __typename?: 'Query', getProductByName: { __typename?: 'ProductResponse', product: { __typename?: 'Product', description: string, name: string, price: number, productId: number, title: string, url: string, userId: number, userOwner: { __typename?: 'User', userId: number, username: string } } } };
+export type GetProductByNameQuery = { __typename?: 'Query', getProductByName: { __typename?: 'Product', description: string, name: string, price: number, productId: number, title: string, url: string, userId: number, userOwner: { __typename?: 'User', userId: number, username: string } } };
 
 export type GetProductQueryVariables = Exact<{
   productId: Scalars['Int']['input'];
 }>;
 
 
-export type GetProductQuery = { __typename?: 'Query', getProduct: { __typename?: 'ProductResponse', product: { __typename?: 'Product', description: string, name: string, price: number, productId: number, title: string, url: string, userId: number, userOwner: { __typename?: 'User', userId: number, username: string } } } };
+export type GetProductQuery = { __typename?: 'Query', getProduct: { __typename?: 'Product', description: string, name: string, price: number, productId: number, title: string, url: string, userId: number, userOwner: { __typename?: 'User', userId: number, username: string } } };
 
 export type CreateProductMutationVariables = Exact<{
   input: NewProductInput;
@@ -397,7 +386,7 @@ export type GetCartQueryVariables = Exact<{
 }>;
 
 
-export type GetCartQuery = { __typename?: 'Query', getCart: { __typename?: 'CartResponse', cart: { __typename?: 'ShoppingCart', items: Array<{ __typename?: 'ProductItem', productId: number, quantity: number, product: { __typename?: 'Product', name: string, price: number, url: string, userOwner: { __typename?: 'User', username: string, userId: number } } }> } } };
+export type GetCartQuery = { __typename?: 'Query', getCart: { __typename?: 'ShoppingCart', userId: number, items: Array<{ __typename?: 'ProductItem', productId: number, quantity: number, product: { __typename?: 'Product', description: string, name: string, price: number, productId: number, title: string, url: string, userId: number } }> } };
 
 export type AddItemMutationVariables = Exact<{
   input: AddItemInput;
@@ -543,18 +532,16 @@ export function useProcessPaymentMutation() {
 export const GetProductsDocument = gql`
     query GetProducts {
   getProducts {
-    product {
-      description
-      name
-      price
-      productId
-      title
-      url
+    description
+    name
+    price
+    productId
+    title
+    url
+    userId
+    userOwner {
       userId
-      userOwner {
-        username
-        userId
-      }
+      username
     }
   }
 }
@@ -566,18 +553,16 @@ export function useGetProductsQuery(options?: Omit<Urql.UseQueryArgs<GetProducts
 export const GetProductByNameDocument = gql`
     query getProductByName($name: String!) {
   getProductByName(name: $name) {
-    product {
-      description
-      name
-      price
-      productId
-      title
-      url
+    description
+    name
+    price
+    productId
+    title
+    url
+    userId
+    userOwner {
       userId
-      userOwner {
-        userId
-        username
-      }
+      username
     }
   }
 }
@@ -589,18 +574,16 @@ export function useGetProductByNameQuery(options: Omit<Urql.UseQueryArgs<GetProd
 export const GetProductDocument = gql`
     query GetProduct($productId: Int!) {
   getProduct(productId: $productId) {
-    product {
-      description
-      name
-      price
-      productId
-      title
-      url
+    description
+    name
+    price
+    productId
+    title
+    url
+    userId
+    userOwner {
       userId
-      userOwner {
-        userId
-        username
-      }
+      username
     }
   }
 }
@@ -648,21 +631,20 @@ export function useUpdateProductMutation() {
 export const GetCartDocument = gql`
     query GetCart($input: GetCartInput!) {
   getCart(input: $input) {
-    cart {
-      items {
+    items {
+      product {
+        description
+        name
+        price
         productId
-        quantity
-        product {
-          name
-          price
-          url
-          userOwner {
-            username
-            userId
-          }
-        }
+        title
+        url
+        userId
       }
+      productId
+      quantity
     }
+    userId
   }
 }
     `;

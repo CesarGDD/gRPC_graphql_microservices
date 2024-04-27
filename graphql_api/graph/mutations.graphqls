@@ -9,7 +9,8 @@ type Mutation {
   processPayment(input: ProcessPaymentInput!): Response!
 
 # users
-  registerUser(input: RegisterUserInput!): Response!
+  signIn(input: RegisterUserInput): AuthResponse! 
+  login(input: LoginInput): AuthResponse! 
   updateUser(input: UpdateUserInput!): Response!
   deleteUser(userId: Int!): Response!
 

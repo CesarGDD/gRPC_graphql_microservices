@@ -18,7 +18,7 @@ import (
 )
 
 // GetProduct is the resolver for the getProduct field.
-func (r *queryResolver) GetProduct(ctx context.Context, productID int) (*productspb.ProductResponse, error) {
+func (r *queryResolver) GetProduct(ctx context.Context, productID int) (*productspb.Product, error) {
 	fmt.Println("Request to get product:", productID)
 
 	res, err := r.ProductsClient.GetProduct(ctx, &productspb.GetProductRequest{
@@ -35,11 +35,11 @@ func (r *queryResolver) GetProduct(ctx context.Context, productID int) (*product
 	}
 
 	fmt.Println("Product retrieved successfully:", res.Product.Product.Name)
-	return res.Product, nil
+	return res.Product.Product, nil
 }
 
 // GetProductByName is the resolver for the getProductByName field.
-func (r *queryResolver) GetProductByName(ctx context.Context, name string) (*productspb.ProductResponse, error) {
+func (r *queryResolver) GetProductByName(ctx context.Context, name string) (*productspb.Product, error) {
 	fmt.Println("Request to get product by name:", name)
 
 	res, err := r.ProductsClient.GetProductByName(ctx, &productspb.GetProductByNameRequest{
@@ -56,11 +56,11 @@ func (r *queryResolver) GetProductByName(ctx context.Context, name string) (*pro
 	}
 
 	fmt.Println("Product retrieved successfully:", res.Product.Product.Name)
-	return res.Product, nil
+	return res.Product.Product, nil
 }
 
 // GetProducts is the resolver for the getProducts field.
-func (r *queryResolver) GetProducts(ctx context.Context) ([]*productspb.ProductResponse, error) {
+func (r *queryResolver) GetProducts(ctx context.Context) ([]*productspb.Product, error) {
 	fmt.Println("Request to get products:")
 
 	res, err := r.ProductsClient.GetProducts(ctx, &productspb.GetProductsRequest{})
@@ -74,8 +74,14 @@ func (r *queryResolver) GetProducts(ctx context.Context) ([]*productspb.ProductR
 		return nil, gqlerror.Errorf("No product found.")
 	}
 
+	var products []*productspb.Product
+	for _, response := range res.Products {
+		if response != nil && response.Product != nil {
+			products = append(products, response.Product)
+		}
+	}
 	fmt.Println("Products retrieved successfully:")
-	return res.Products, nil
+	return products, nil
 }
 
 // GetOrderDetails is the resolver for the getOrderDetails field.
@@ -162,9 +168,9 @@ func (r *queryResolver) GetUser(ctx context.Context, userID int) (*usermanagemen
 
 	fmt.Println("user retrieved successfully:", res.User)
 	return &usermanagementpb.User{
-		UserId: res.User.UserId,
+		UserId:   res.User.UserId,
 		Username: res.User.Username,
-		Role: res.User.Role,
+		Role:     res.User.Role,
 	}, nil
 }
 
@@ -186,9 +192,9 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*usermanagementpb.User,
 	var users []*usermanagementpb.User
 	for _, user := range res.Users {
 		users = append(users, &usermanagementpb.User{
-			UserId: user.UserId,
+			UserId:   user.UserId,
 			Username: user.Username,
-			Role: user.Role,
+			Role:     user.Role,
 		})
 	}
 
@@ -215,14 +221,14 @@ func (r *queryResolver) GetUserByUsername(ctx context.Context, username string) 
 
 	fmt.Println("user retrieved successfully:", res.User)
 	return &usermanagementpb.User{
-		UserId: res.User.UserId,
+		UserId:   res.User.UserId,
 		Username: res.User.Username,
-		Role: res.User.Role,
+		Role:     res.User.Role,
 	}, nil
 }
 
 // GetCart is the resolver for the getCart field.
-func (r *queryResolver) GetCart(ctx context.Context, input model.GetCartInput) (*model.CartResponse, error) {
+func (r *queryResolver) GetCart(ctx context.Context, input model.GetCartInput) (*shoppingcart.ShoppingCart, error) {
 	fmt.Println("Request to get shopping cart:", input.UserID)
 
 	res, err := r.ShoppingCartClient.GetCart(ctx, &shoppingcart.GetCartRequest{
@@ -239,10 +245,7 @@ func (r *queryResolver) GetCart(ctx context.Context, input model.GetCartInput) (
 	}
 
 	fmt.Println("user retrieved successfully:", res.Cart)
-	return &model.CartResponse{
-		Success: res.Success,
-		Cart:    res.Cart,
-	}, nil
+	return res.Cart, nil
 }
 
 // Query returns QueryResolver implementation.

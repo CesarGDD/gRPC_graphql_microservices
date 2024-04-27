@@ -34,6 +34,7 @@ message RegisterRequest {
 // Response message for registering a new user.
 message RegisterResponse {
     Response response = 1;
+    User user = 2;
 }
 
 message UpdateUserRequest {
@@ -64,7 +65,7 @@ message GetUserByUsernameRequest {
 }
 
 message GetUserByUsernameResponse {
-    UserResponse user = 1;
+    User user = 1;
 }
 
 message DeleteUserRequest {

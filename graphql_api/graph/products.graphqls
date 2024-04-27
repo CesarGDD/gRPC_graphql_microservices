@@ -9,11 +9,6 @@ type Product {
   userOwner: User!
 }
 
-
-type ProductResponse {
-  product: Product!
-}
-
 input NewProductInput {
   name: String!
   userId: Int!

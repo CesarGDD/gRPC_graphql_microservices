@@ -11,6 +11,16 @@ type User {
   orders: [OrderDetails!]
 }
 
+type AuthResponse {
+  token: String!
+  user: User!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
 input RegisterUserInput {
   username: String!
   password: String!

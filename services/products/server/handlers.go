@@ -71,11 +71,12 @@ func (s *ProductsServer) GetProduct(ctx context.Context, req *proto.GetProductRe
 		Product: &proto.ProductResponse{
 			Product: &proto.Product{
 				ProductId: product.ProductID,
+				UserId: product.UserID,
 				Name: product.Name,
 				Url: product.Url,
 				Price: product.Price,
 				Description: product.Description,
-
+				Title: product.Title,
 			},
 		},
 	}, nil
@@ -96,7 +97,6 @@ func (s *ProductsServer) GetProductByName(ctx context.Context, req *proto.GetPro
 				Url: product.Url,
 				Price: product.Price,
 				Description: product.Description,
-
 			},
 		},
 	}, nil
@@ -138,6 +138,7 @@ func (s *ProductsServer) GetProducts(ctx context.Context, req *proto.GetProducts
 		productsResponses = append(productsResponses, &proto.ProductResponse{
 			Product: &proto.Product{
 				ProductId: product.ProductID,
+				UserId: product.UserID,
 				Name: product.Name,
 				Url: product.Url,
 				Price: product.Price,

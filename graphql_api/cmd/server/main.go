@@ -2,7 +2,9 @@ package main
 
 import (
 	clients "graphql_api/clients/server"
+	"graphql_api/directives"
 	"graphql_api/graph"
+	"graphql_api/pkg/middlewares"
 	"log"
 	"net/http"
 	"os"
@@ -36,7 +38,12 @@ func main() {
 	}
 
 	// Create GraphQL handler
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
+
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver,
+		Directives: graph.DirectiveRoot{
+			Auth: directives.Auth,
+		},
+	}))
 
 	// Configure chi router with CORS
 	router := chi.NewRouter()
@@ -47,7 +54,7 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not necessary but useful for preflight requests
 	}))
-
+	router.Use(middlewares.AuthMiddleware)
 	// Set up HTTP routes
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)

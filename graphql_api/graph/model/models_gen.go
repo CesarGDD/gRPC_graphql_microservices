@@ -5,7 +5,7 @@ package model
 import (
 	"fmt"
 	checkout "graphql_api/protos/checkoutpb"
-	shoppingcart "graphql_api/protos/shoppingcartpb"
+	"graphql_api/protos/usermanagementpb"
 	"io"
 	"strconv"
 )
@@ -15,9 +15,9 @@ type AddItemInput struct {
 	Item   *ProductItemInput `json:"item"`
 }
 
-type CartResponse struct {
-	Success bool                       `json:"success"`
-	Cart    *shoppingcart.ShoppingCart `json:"cart"`
+type AuthResponse struct {
+	Token string                 `json:"token"`
+	User  *usermanagementpb.User `json:"user"`
 }
 
 type ClearCartInput struct {
@@ -44,6 +44,11 @@ type GetOrdersDetailsByUserIDInput struct {
 
 type GetPaymentDetailsInput struct {
 	OrderID int `json:"orderId"`
+}
+
+type LoginInput struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type Mutation struct {

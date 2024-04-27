@@ -9,7 +9,7 @@ import (
 
 func (s *UserManagementServer) Register(ctx context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
 	log.Println("Register user invoked")
-	err := s.queries.CreateUser(ctx, db.CreateUserParams{
+	res, err := s.queries.CreateUser(ctx, db.CreateUserParams{
 		Username:     req.Username,
 		PasswordHash: req.Password,
 		Role:         req.Role,
@@ -27,6 +27,11 @@ func (s *UserManagementServer) Register(ctx context.Context, req *proto.Register
 		Response: &proto.Response{
 			Success: true,
 			Message: "User created successfully",
+		},
+		User: &proto.User{
+			UserId: res.UserID,
+			Username: res.Username,
+			Role: res.Role,
 		},
 	}, nil
 }
@@ -99,9 +104,10 @@ func (s *UserManagementServer) GetUserByUsername(ctx context.Context, req *proto
 	}
 
 	return &proto.GetUserByUsernameResponse{
-		User: &proto.UserResponse{
+		User: &proto.User{
 			UserId:   user.UserID,
 			Username: user.Username,
+			PasswordHash: user.PasswordHash,
 			Role:     user.Role,
 		},
 	}, nil

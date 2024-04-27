@@ -9,9 +9,10 @@ import (
 	"context"
 )
 
-const createUser = `-- name: CreateUser :exec
+const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, password_hash, role)
-VALUES ($1, $2, $3)
+VALUES ($1, $2, $3) 
+RETURNING user_id, username, password_hash, role
 `
 
 type CreateUserParams struct {
@@ -20,9 +21,16 @@ type CreateUserParams struct {
 	Role         string
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.Exec(ctx, createUser, arg.Username, arg.PasswordHash, arg.Role)
-	return err
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.PasswordHash, arg.Role)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.Username,
+		&i.PasswordHash,
+		&i.Role,
+	)
+	return i, err
 }
 
 const deleteUser = `-- name: DeleteUser :exec
@@ -52,19 +60,18 @@ func (q *Queries) GetUser(ctx context.Context, userID int32) (GetUserRow, error)
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT user_id, username, role FROM users WHERE username = $1
+SELECT user_id, username, password_hash, role FROM users WHERE username = $1
 `
 
-type GetUserByUsernameRow struct {
-	UserID   int32
-	Username string
-	Role     string
-}
-
-func (q *Queries) GetUserByUsername(ctx context.Context, username string) (GetUserByUsernameRow, error) {
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByUsername, username)
-	var i GetUserByUsernameRow
-	err := row.Scan(&i.UserID, &i.Username, &i.Role)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.Username,
+		&i.PasswordHash,
+		&i.Role,
+	)
 	return i, err
 }
 

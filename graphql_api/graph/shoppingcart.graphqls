@@ -4,10 +4,6 @@ type ProductItem {
   product: Product!
 }
 
-type CartResponse {
-  success: Boolean!
-  cart: ShoppingCart!
-}
 
 type ShoppingCart {
   userId: Int!

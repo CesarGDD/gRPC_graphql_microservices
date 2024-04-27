@@ -1,8 +1,10 @@
+directive @auth on FIELD_DEFINITION
+
 type Query {
 # products
-  getProduct(productId: Int!): ProductResponse!
-  getProductByName(name: String!): ProductResponse!
-  getProducts: [ProductResponse!]!
+  getProduct(productId: Int!): Product!
+  getProductByName(name: String!): Product!
+  getProducts: [Product!]!
 
 # orders
   getOrderDetails(input: GetOrderDetailsInput!): Order!
@@ -15,5 +17,5 @@ type Query {
   getUserByUsername(username: String!): User!
 
 # cart
-  getCart(input: GetCartInput!): CartResponse!
+  getCart(input: GetCartInput!): ShoppingCart! @auth
 }
