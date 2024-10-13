@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphql-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graphql-api
+  template:
+    metadata:
+      labels:
+        app: graphql-api
+    spec:
+      containers:
+      - name: graphql-api
+        image: your-image-name-here
+        ports:
+        - containerPort: 8080
+        env:
+        - name: CHECKOUT_URL
+          value: checkout:50053
+        - name: USERMANAGEMENT_URL
+          value: usermanagement:50050
+        - name: PRODUCTS_URL
+          value: products:50051
+        - name: SHOPPINGCART_URL
+          value: shoppingcart:50052
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphql-api
+spec:
+  selector:
+    app: graphql-api
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

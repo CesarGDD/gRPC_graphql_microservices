@@ -25,10 +25,23 @@ query GetUserByUsername($username: String!) {
 
 # Mutations
 
-mutation RegisterUser($input: RegisterUserInput!) {
-  registerUser(input: $input) {
-    message
-    success
+mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    token
+    user {
+      userId
+      username
+    }
+  }
+}
+
+mutation SignIn($input: RegisterUserInput) {
+  signIn(input: $input) {
+    token
+    user {
+      userId
+      username
+    }
   }
 }
 

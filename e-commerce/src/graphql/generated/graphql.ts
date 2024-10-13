@@ -24,6 +24,12 @@ export type AddItemInput = {
   userId: Scalars['Int']['input'];
 };
 
+export type AuthResponse = {
+  __typename?: 'AuthResponse';
+  token: Scalars['String']['output'];
+  user: User;
+};
+
 export type ClearCartInput = {
   userId: Scalars['Int']['input'];
 };
@@ -50,6 +56,11 @@ export type GetPaymentDetailsInput = {
   orderId: Scalars['Int']['input'];
 };
 
+export type LoginInput = {
+  password: Scalars['String']['input'];
+  username: Scalars['String']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addItem: Response;
@@ -58,9 +69,10 @@ export type Mutation = {
   createProduct: Response;
   deleteProduct: Response;
   deleteUser: Response;
+  login: AuthResponse;
   processPayment: Response;
-  registerUser: Response;
   removeItem: Response;
+  signIn: AuthResponse;
   updateItem: Response;
   updateProduct: Response;
   updateUser: Response;
@@ -97,18 +109,23 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationLoginArgs = {
+  input?: InputMaybe<LoginInput>;
+};
+
+
 export type MutationProcessPaymentArgs = {
   input: ProcessPaymentInput;
 };
 
 
-export type MutationRegisterUserArgs = {
-  input: RegisterUserInput;
+export type MutationRemoveItemArgs = {
+  input: RemoveItemInput;
 };
 
 
-export type MutationRemoveItemArgs = {
-  input: RemoveItemInput;
+export type MutationSignInArgs = {
+  input?: InputMaybe<RegisterUserInput>;
 };
 
 
@@ -435,12 +452,19 @@ export type GetUserByUsernameQueryVariables = Exact<{
 
 export type GetUserByUsernameQuery = { __typename?: 'Query', getUserByUsername: { __typename?: 'User', username: string, userId: number, role: Role } };
 
-export type RegisterUserMutationVariables = Exact<{
-  input: RegisterUserInput;
+export type LoginMutationVariables = Exact<{
+  input: LoginInput;
 }>;
 
 
-export type RegisterUserMutation = { __typename?: 'Mutation', registerUser: { __typename?: 'Response', message: string, success: boolean } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'AuthResponse', token: string, user: { __typename?: 'User', userId: number, username: string } } };
+
+export type SignInMutationVariables = Exact<{
+  input?: InputMaybe<RegisterUserInput>;
+}>;
+
+
+export type SignInMutation = { __typename?: 'Mutation', signIn: { __typename?: 'AuthResponse', token: string, user: { __typename?: 'User', userId: number, username: string } } };
 
 export type UpdateUserMutationVariables = Exact<{
   input: UpdateUserInput;
@@ -739,17 +763,35 @@ export const GetUserByUsernameDocument = gql`
 export function useGetUserByUsernameQuery(options: Omit<Urql.UseQueryArgs<GetUserByUsernameQueryVariables>, 'query'>) {
   return Urql.useQuery<GetUserByUsernameQuery, GetUserByUsernameQueryVariables>({ query: GetUserByUsernameDocument, ...options });
 };
-export const RegisterUserDocument = gql`
-    mutation RegisterUser($input: RegisterUserInput!) {
-  registerUser(input: $input) {
-    message
-    success
+export const LoginDocument = gql`
+    mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    token
+    user {
+      userId
+      username
+    }
   }
 }
     `;
 
-export function useRegisterUserMutation() {
-  return Urql.useMutation<RegisterUserMutation, RegisterUserMutationVariables>(RegisterUserDocument);
+export function useLoginMutation() {
+  return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+};
+export const SignInDocument = gql`
+    mutation SignIn($input: RegisterUserInput) {
+  signIn(input: $input) {
+    token
+    user {
+      userId
+      username
+    }
+  }
+}
+    `;
+
+export function useSignInMutation() {
+  return Urql.useMutation<SignInMutation, SignInMutationVariables>(SignInDocument);
 };
 export const UpdateUserDocument = gql`
     mutation UpdateUser($input: UpdateUserInput!) {

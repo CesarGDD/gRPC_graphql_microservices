@@ -8,7 +8,7 @@ import (
 	db "products-svc/database"
 	proto "products-svc/proto"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ProductsServer struct {
@@ -26,14 +26,23 @@ func NewProductsServer() (*ProductsServer, error) {
 	// Create connection string
 	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s", user, password, host, dbName)
 
-	// Connect to database
-	conn, err := pgx.Connect(context.Background(), connStr)
+	// Connect to database using a connection pool
+	poolConfig, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v", err)
+		log.Fatalf("Failed to parse pool configuration: %v", err)
 		return nil, err
 	}
 
-	queries := db.New(conn)
+	// Optionally, configure the pool here (e.g., MaxConns, MinConns)
+	poolConfig.MaxConns = 10 // Example: setting max connections in the pool
+
+	pool, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
+	if err != nil {
+		log.Fatalf("Failed to establish connection pool: %v", err)
+		return nil, err
+	}
+
+	queries := db.New(pool)
 
 	server := &ProductsServer{
 		queries: queries,

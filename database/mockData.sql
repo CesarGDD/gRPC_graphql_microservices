@@ -12,3 +12,11 @@ VALUES
 (10, 1, 'Mega Product', 'https://images.unsplash.com/photo-1565252503738-0d47de5d50e8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjR8fHRoaW5nfGVufDB8fDB8fHww', 65, 'Bigger and better than ever before.', 'Product Mega'),
 (11, 1, 'Hyper Gizmo', 'https://images.unsplash.com/photo-1506899689252-707a63f4c766?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzF8fHRoaW5nfGVufDB8fDB8fHww', 70, 'Hyper-efficient, hyper-useful.', 'Gizmo Hyper'),
 (12, 1, 'Elite Contraption', 'https://images.unsplash.com/photo-1523132797263-747d5d0dbbb3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzZ8fHRoaW5nfGVufDB8fDB8fHww', 75, 'Crafted for the elite.', 'Contraption Elite');
+
+INSERT INTO users (username, password_hash, role)
+VALUES
+    ('user1', '$2a$10$BwxIFdnfimG7K5PYzpggXeT4E8g6sSf8I1dudgjaMhzt0ZZLL0VEi', 'seller'),
+    ('user2', '$2a$10$BwxIFdnfimG7K5PYzpggXeT4E8g6sSf8I1dudgjaMhzt0ZZLL0VEi', 'buyer'),
+    ('user3', '$2a$10$BwxIFdnfimG7K5PYzpggXeT4E8g6sSf8I1dudgjaMhzt0ZZLL0VEi', 'seller'),
+    ('user4', '$2a$10$BwxIFdnfimG7K5PYzpggXeT4E8g6sSf8I1dudgjaMhzt0ZZLL0VEi', 'buyer'),
+    ('user5', '$2a$10$BwxIFdnfimG7K5PYzpggXeT4E8g6sSf8I1dudgjaMhzt0ZZLL0VEi', 'seller');

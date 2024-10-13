@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   pgadmin:
     image: dpage/pgadmin4
@@ -102,6 +101,20 @@ services:
       - shoppingcart
       - products
       - checkout
+
+  web:
+    build:
+      context: ./e-commerce
+      dockerfile: docker/dockerfile_dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./e-commerce:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
+    tty: true
       
 
 volumes:
